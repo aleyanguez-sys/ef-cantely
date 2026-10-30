@@ -1,0 +1,332 @@
+<!doctype html><html lang="es"><head><title>Cuaderno EF Cantely</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="EF Cantely"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#c2410c">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f5f3ec;--panel:#fffdf8;--fg:#1b1d1f;--mute:#6a6d70;--line:#dedad0;--accent:#c2410c;--accent-fg:#fff;--ok:#2f7d4f;--l1:#d9b8b0;--l2:#e8d596;--l3:#b9d6a8;--l4:#7fbf8e;--l1f:#5a1f12;--l2f:#4a3a05;--l3f:#1f4012;--l4f:#0f3a1c;--sda1:#c2410c;--sda2:#0b6e7a;--other:#8a8d90;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131517;--panel:#1c1f22;--fg:#eceae3;--mute:#9a9d9f;--line:#2e3236;--accent:#ff8a4c;--accent-fg:#1a0d04;--ok:#6fcf97;--l1:#6b3328;--l2:#6d5a14;--l3:#3c6a2a;--l4:#2b7a45;--l1f:#ffd9d0;--l2f:#fff0b8;--l3f:#e0f5d4;--l4f:#d8f7e2;--sda1:#ff8a4c;--sda2:#4cc4d3;--other:#6a6d70;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#131517;--panel:#1c1f22;--fg:#eceae3;--mute:#9a9d9f;--line:#2e3236;--accent:#ff8a4c;--accent-fg:#1a0d04;--ok:#6fcf97;--l1:#6b3328;--l2:#6d5a14;--l3:#3c6a2a;--l4:#2b7a45;--l1f:#ffd9d0;--l2f:#fff0b8;--l3f:#e0f5d4;--l4f:#d8f7e2;--sda1:#ff8a4c;--sda2:#4cc4d3;--other:#6a6d70;color-scheme:dark}
+*{box-sizing:border-box}html{color-scheme:light dark}body{margin:0;padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--fg);font:16px/1.4 Barlow,system-ui,sans-serif;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:0 84px;max-width:720px;margin:0 auto}
+h1,h2,h3{font-family:'Barlow Condensed',Impact,sans-serif;margin:0;letter-spacing:.2px;text-wrap:balance}
+h1{font-size:30px}h2{font-size:24px}h3{font-size:19px}
+button{font:inherit;color:inherit;cursor:pointer}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 0 8px}
+.mute{color:var(--mute)}.small{font-size:13px}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);display:flex;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));z-index:20}
+.tabs button{flex:1;border:0;background:none;padding:8px 2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;color:var(--mute);border-radius:10px;letter-spacing:.4px;text-transform:uppercase}
+.tabs button.on{color:var(--accent-fg);background:var(--accent)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 10px;min-width:0}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:10px 14px;font-weight:600}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:transparent}
+.btn.sm{padding:6px 10px;font-size:14px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.days{display:flex;gap:6px;margin:6px 0 12px}
+.days button{flex:1;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 0;line-height:1.1;text-align:center}
+.days button b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:20px}
+.days button.on{background:var(--fg);color:var(--bg);border-color:transparent}
+.days button.today{outline:2px solid var(--accent);outline-offset:1px}
+.ev{display:flex;gap:12px;border-left:6px solid var(--other);cursor:default}
+.ev.tap{cursor:pointer}
+.ev .t{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;min-width:50px;line-height:1.1}
+.ev .t span{display:block;color:var(--mute);font-weight:600;font-size:15px}
+.ev h3{font-size:20px}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:2px 7px;border-radius:6px;border:1px solid currentColor}
+.s1{border-left-color:var(--sda1)}.s2{border-left-color:var(--sda2)}
+.tg1{color:var(--sda1)}.tg2{color:var(--sda2)}
+.blk{display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.blk:first-of-type{border-top:0}
+.blk .m{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;min-width:46px;color:var(--accent)}
+.blk .m small{font-size:13px;color:var(--mute);display:block;line-height:1}
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:30;overflow-y:auto;padding:0 max(16px,env(safe-area-inset-left,0px)) 40px max(16px,env(safe-area-inset-right,0px))}
+.sheet>div{max-width:720px;margin:0 auto}
+.sheet .bar{position:sticky;top:0;background:var(--bg);padding:calc(10px + env(safe-area-inset-top,0px)) 0 10px;z-index:2}
+textarea,select,input{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 10px;width:100%}
+textarea{min-height:90px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;font-weight:600;font-size:14px}
+.chip.on{background:var(--fg);color:var(--bg);border-color:transparent}
+.st{padding:10px 0;border-top:1px solid var(--line)}
+.st:first-child{border-top:0}
+.st .nm{display:flex;justify-content:space-between;gap:8px;font-weight:600;margin-bottom:6px}
+.btns{display:flex;gap:4px}
+.btns button{flex:1;min-width:0;border:0;border-radius:8px;padding:12px 0;font-weight:700;font-size:15px;line-height:1.1;background:var(--line);color:var(--fg)}
+.btns.n10 button{padding:11px 0;font-size:14px}
+.btns .v1.on{background:var(--l1);color:var(--l1f)}.btns .v2.on{background:var(--l2);color:var(--l2f)}.btns .v3.on{background:var(--l3);color:var(--l3f)}.btns .v4.on{background:var(--l4);color:var(--l4f)}
+.btns .vn.on{background:var(--accent);color:var(--accent-fg)}
+.btns button.on{box-shadow:inset 0 0 0 2px currentColor}
+.nota{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+td,th{padding:6px 6px;border-bottom:1px solid var(--line);text-align:left}
+.scroll{overflow-x:auto}
+.legend{display:flex;gap:6px;flex-wrap:wrap;font-size:13px;margin-bottom:8px}
+.legend i{padding:2px 8px;border-radius:6px;font-style:normal;font-weight:700}
+.note{border-left:4px solid var(--accent);padding:6px 10px;margin:8px 0;background:color-mix(in srgb,var(--accent) 8%,transparent);border-radius:0 8px 8px 0}
+</style></head><body>
+<div id="app"></div>
+<nav class="tabs" id="tabs"></nav>
+<script>
+/* ===================== DATOS ===================== */
+const DOW=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const DOWS=['D','L','M','X','J','V','S'];
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const START='2026-11-02',END='2026-12-22';
+const HOL={'2026-11-02':'Festivo','2026-12-07':'No lectivo','2026-12-08':'Inmaculada'};
+const GROUPS=['4ºA DIVER','4ºB','4ºC','4ºD'];
+const gk=g=>g.split(' ')[0]; // 4ºA
+/* [dow, inicio, fin, tipo, grupo/etiqueta] */
+const TT=[
+[1,'08:00','09:00','ef','4ºB'],[1,'09:00','10:00','ef','4ºA DIVER'],[1,'10:00','11:00','ef','1ºC'],[1,'11:30','12:30','gu','Guardia'],[1,'12:30','13:30','re','Reunión de tutores 3º-4º'],
+[2,'08:00','09:00','ef','1ºC'],[2,'09:00','10:00','ef','4ºA DIVER'],[2,'10:00','11:00','tu','Tutoría 4ºA DIVER'],[2,'12:30','13:30','ef','1ºD'],
+[3,'08:00','09:00','ae','Atención Educativa 2ºE'],[3,'09:00','10:00','ef','1ºC'],[3,'10:00','11:00','ef','4ºC'],[3,'12:30','13:30','ef','4ºD'],
+[4,'08:00','09:00','ef','4ºB'],[4,'09:00','10:00','gu','Guardia'],[4,'10:00','11:00','ef','1ºD'],[4,'11:30','12:30','ef','4ºC'],
+[5,'08:00','09:00','ef','1ºD'],[5,'09:00','10:00','ae','Atención Educativa 2ºD'],[5,'10:00','11:00','gu','Guardia'],[5,'11:30','12:30','ef','4ºD']];
+
+const SDA={
+1:{name:'De las CFB al Hyrox',full:'Condición física: de las CFB al Hyrox y el CrossFit',draft:false,
+ acts:[
+  {id:'ficha',name:'Ficha del circuito Hyrox',ses:'Sesiones 4-5',inds:['Seguridad','Claridad','Organización','Trabajo en equipo'],lv:['En proceso','Logrado','Destacado'],max:3,desc:'Documento de proyecto en equipo: 6 estaciones, tiempos, normas de seguridad y escalado.'},
+  {id:'act1',name:'Comportamiento y actitud',ses:'Sesiones 1-6',inds:['Esfuerzo y participación','Respeto y normas','Material e higiene'],lv:['Mejorable','Suficiente','Bien','Excelente'],max:4,desc:'Observación continua a lo largo de las 6 sesiones.'},
+  {id:'exam',name:'Examen escrito de CFB',ses:'Sesión 6 (20 min)',inds:['Nota'],lv:null,max:10,desc:'10 preguntas sobre CFB, RPE y formatos AMRAP/EMOM/Hyrox.'}],
+ ses:[
+ {t:'Las CFB y cómo se entrenan',obj:'Identificar las cuatro capacidades físicas básicas y asociarlas a ejercicios; aprender la escala de esfuerzo percibido (RPE 1-10).',
+  b:[[10,'Calentamiento general','Carrera suave, skipping, talones, movilidad de cadera, hombros y tobillos. Termina con 2 progresiones de 20 m.'],
+     [10,'Explicación en gradas/cancha','Las 4 CFB: fuerza, resistencia, velocidad, flexibilidad. Escala RPE: 1 muy fácil – 10 máximo. Se pide un RPE tras cada estación.'],
+     [23,'Circuito de 6 estaciones (3\' + 1\' cambio)','Fuerza (sentadilla con mochila) · Resistencia (comba) · Velocidad (lanzadera 10 m) · Flexibilidad (movilidad activa) · Core (plancha) · Coordinación (escalera/conos). Parejas, anotan RPE.'],
+     [7,'Vuelta a la calma y pregunta de salida','Estiramientos. ¿Qué CFB has trabajado más hoy y cómo lo sabes?'],
+     [5,'Recogida','Material por equipos.']],
+  mat:'Mochilas, cuerdas de comba, conos, escalera de agilidad, colchonetas.',ev:'Observación: Comportamiento y actitud (sesión 1).'},
+ {t:'CrossFit I: formatos y técnica',obj:'Conocer los formatos AMRAP, EMOM y For time y ejecutar con técnica seis movimientos básicos escalables.',
+  b:[[10,'Calentamiento específico','Movilidad + 2 rondas de 5 sentadillas, 5 flexiones escaladas, 5 swings.'],
+     [10,'Técnica de movimientos','Sentadilla aérea · flexión (escalada A/B/C) · burpee · remo invertido o con goma · swing con balón medicinal · salto a banco bajo.'],
+     [8,'EMOM 8\'','Minuto par: 8 sentadillas. Minuto impar: 5 flexiones escaladas.'],
+     [17,'AMRAP 10\' en parejas','Pareja A trabaja, B descansa (alternan). 6 burpees + 10 swings + 8 sentadillas con mochila. Anotan rondas.'],
+     [5,'Vuelta a la calma','Estiramiento + RPE final.'],
+     [5,'Mini reflexión','AMRAP, EMOM, For time: ¿en qué se diferencian?']],
+  mat:'Balones medicinales, bancos suecos, gomas elásticas, mochilas, cronómetro.',ev:'Observación: Comportamiento y actitud (sesión 2).'},
+ {t:'Hyrox I: conocemos el formato',obj:'Entender el formato Hyrox (8 × 1 km + estación) y probar estaciones adaptadas al material del centro.',
+  b:[[10,'Calentamiento','Carrera continua 3\' + movilidad + 3 progresiones.'],
+     [10,'Explicación del Hyrox','8 rondas: carrera + estación (SkiErg, trineo empuje, trineo arrastre, burpee broad jump, remo, farmer carry, zancadas con saco, wall balls). Aquí lo adaptamos con el material del cole.'],
+     [25,'Rotación de 6 estaciones adaptadas','Empuje de colchoneta · arrastre de cuerda con colchoneta · burpee broad jump · remo con goma · transporte de mochilas (farmer) · zancadas con mochila / wall balls. 2\' trabajo + 1\' cambio, carrera 100 m entre estaciones.'],
+     [5,'Reparto de la ficha','Se forman equipos de 4 (heterogéneos) y se explica la Ficha del circuito Hyrox.'],
+     [5,'Vuelta a la calma','Estiramiento + RPE.']],
+  mat:'Colchonetas, cuerdas, gomas, mochilas, balones medicinales, conos.',ev:'Se presenta la Ficha Hyrox (se evalúa en sesiones 4-5). Actitud (sesión 3).'},
+ {t:'Diseñamos nuestro Hyrox I',obj:'Diseñar en equipo un circuito Hyrox de 6 estaciones con tiempos, normas de seguridad y escalado.',
+  b:[[8,'Calentamiento','Dirigido por un equipo voluntario.'],
+     [12,'Diseño en la ficha','Elegir 6 estaciones, repeticiones/tiempos, orden, normas de seguridad y 2 niveles de escalado (DUA).'],
+     [25,'Prueba de estaciones','Cada equipo prueba 2-3 estaciones propias y ajusta tiempos y espacio.'],
+     [5,'Vuelta a la calma + RPE',''],
+     [5,'Reflexión de equipo','¿Qué cambiamos? Anotar en la ficha.']],
+  mat:'Fichas impresas, lápices, material de estaciones, cronómetro.',ev:'EVALÚA: Ficha Hyrox (progreso) + Actitud.'},
+ {t:'Diseñamos nuestro Hyrox II',obj:'Cerrar la ficha, montar el circuito y probar el de otro equipo con feedback.',
+  b:[[8,'Calentamiento',''],
+     [15,'Cerrar y entregar la ficha','Revisar con lista de cotejo: seguridad, claridad, organización.'],
+     [25,'Intercambio de circuitos','Cada equipo monta su circuito y otro equipo lo recorre. Feedback con lista de cotejo.'],
+     [7,'Vuelta a la calma y feedback','Una mejora y un acierto por circuito.']],
+  mat:'Fichas, material de estaciones, listas de cotejo.',ev:'EVALÚA: Ficha Hyrox (rúbrica) + Actitud.'},
+ {t:'Competimos: Mini Hyrox y examen',obj:'Competir en un Mini Hyrox por equipos, autorregulando el esfuerzo, y demostrar lo aprendido en el examen.',
+  b:[[8,'Calentamiento',''],
+     [22,'Mini Hyrox por equipos','Circuito de 6 estaciones (de las fichas), relevos por parejas, tiempo total del equipo. Registrar RPE.'],
+     [5,'Vuelta a la calma',''],
+     [20,'Examen escrito (10 preguntas)','Individual, en silencio. CFB, RPE, AMRAP/EMOM, Hyrox, seguridad.']],
+  mat:'Circuitos montados, cronómetros, examen impreso.',ev:'EVALÚA: Examen escrito + Actitud (cierre).'}]},
+2:{name:'Deportes alternativos',full:'Deportes alternativos: Ultimate, Pickleball y Colpbol',draft:true,
+ acts:[
+  {id:'des',name:'Desempeño en juego',ses:'Sesiones 2-6',inds:['Técnica','Táctica y colaboración','Juego limpio'],lv:['En proceso','Logrado','Destacado'],max:3,desc:'Observación del juego en situaciones reales. BORRADOR por confirmar.'},
+  {id:'act2',name:'Comportamiento y actitud',ses:'Sesiones 1-6',inds:['Esfuerzo y participación','Respeto y normas','Material e higiene'],lv:['Mejorable','Suficiente','Bien','Excelente'],max:4,desc:'Observación continua.'}],
+ ses:[
+ {t:'Ultimate I: el disco',obj:'Lanzar y recibir el disco con derecha y revés; conocer las reglas básicas y el espíritu del juego.',
+  b:[[10,'Calentamiento con disco','Pases en parejas progresivos, movilidad.'],[15,'Técnica de pase','Derecha, revés, recepción a una y dos manos.'],[25,'Mini-juegos 3v3','Sin contacto, pase obligatorio, anotar en zona.'],[5,'Vuelta a la calma y reglas','Espíritu del juego: autoarbitraje.']],mat:'Discos (1 por pareja), conos, petos.',ev:'Actitud.'},
+ {t:'Ultimate II: partido',obj:'Aplicar desmarque y pase en partido 4v4 / 5v5.',
+  b:[[10,'Calentamiento',''],[15,'Desmarque y apoyo','Ejercicio 3v1 con disco.'],[25,'Partidos 4v4 con rotación','Autoarbitraje.'],[5,'Calma y feedback','']],mat:'Discos, conos, petos.',ev:'Desempeño en juego + Actitud.'},
+ {t:'Pickleball I',obj:'Aprender golpeos básicos, saque y reglas del pickleball.',
+  b:[[10,'Calentamiento',''],[20,'Golpeos y saque','Derecha, revés, saque por debajo.'],[20,'Rallies cooperativos','En parejas.'],[5,'Calma','']],mat:'Palas, pelotas, red/cuerdas, conos.',ev:'Desempeño en juego + Actitud.'},
+ {t:'Pickleball II: dobles',obj:'Jugar dobles aplicando reglas, puntuación y colocación.',
+  b:[[10,'Calentamiento',''],[10,'Reglas de dobles y puntuación',''],[30,'Mini-liga de dobles','Rotación por pistas.'],[5,'Calma','']],mat:'Palas, pelotas, pistas.',ev:'Desempeño en juego + Actitud.'},
+ {t:'Colpbol I: conocemos el juego',obj:'Conocer el colpbol, sus reglas básicas y practicar pase, conducción y finalización en cooperación.',
+  b:[[10,'Calentamiento',''],[10,'Reglas básicas','Juego cooperativo, sin contacto, respeto a los compañeros (a ajustar al material disponible).'],[30,'Mini-juegos y partidos reducidos','Rotación de equipos y roles.'],[5,'Calma','']],mat:'Balón de colpbol o similar, porterías, conos, petos.',ev:'Desempeño en juego + Actitud.'},
+ {t:'Colpbol II: torneo y cierre',obj:'Aplicar lo aprendido en un torneo de colpbol y valorar el propio aprendizaje de la unidad.',
+  b:[[10,'Calentamiento',''],[30,'Torneo de colpbol','Rotación de equipos, árbitros del propio grupo.'],[10,'Autoevaluación y coevaluación','Ficha corta sobre los tres deportes.'],[5,'Recogida','']],mat:'Material de colpbol, ficha de autoevaluación.',ev:'EVALÚA: Desempeño en juego + Actitud (cierre).'}]}
+};
+
+/* ===================== ESTADO ===================== */
+const KEY='cuadernoEF.v1';
+let S={u:0,roster:{},scores:{},skipped:{},notes:{},done:{}};
+let UI={tab:'agenda',date:null,sheet:null,evG:GROUPS[0],evA:'ficha',evI:0,sdaOpen:null};
+let dbDoc=null,saveT=null;
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+function save(){S.u=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ===================== FECHAS Y CLASES ===================== */
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const addDays=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return iso(d)};
+const fmt=s=>{const d=parse(s);return DOW[d.getDay()]+' '+d.getDate()+' '+MES[d.getMonth()]};
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const todayIso=iso(new Date());
+function lectivo(s){const d=parse(s).getDay();return d>=1&&d<=5&&!HOL[s]&&s>=START&&s<=END}
+/* lista cronológica de clases de un grupo de 4º (sin las suspendidas) */
+const _cache={};
+function classes(g){
+ const sk=(S.skipped[g]||[]).join(',');const ck=g+'|'+sk;if(_cache[ck])return _cache[ck];
+ const out=[];let d=START;
+ while(d<=END){ if(lectivo(d)){const dw=parse(d).getDay();
+   TT.filter(x=>x[0]===dw&&x[3]==='ef'&&x[4]===g).forEach(x=>{ if(!(S.skipped[g]||[]).includes(d+'@'+x[1])) out.push({date:d,start:x[1],end:x[2]}) }) }
+   d=addDays(d,1);}
+ out.forEach((c,i)=>{c.n=i+1; if(c.n<=6){c.sda=1;c.s=c.n}else if(c.n<=12){c.sda=2;c.s=c.n-6}else{c.sda=0;c.s=0}});
+ _cache[ck]=out;return out}
+function classInfo(g,date,start){return classes(g).find(c=>c.date===date&&c.start===start)}
+function dayItems(date){
+ if(!lectivo(date))return [];
+ const dw=parse(date).getDay();
+ return TT.filter(x=>x[0]===dw).map(x=>{
+   const it={start:x[1],end:x[2],kind:x[3],label:x[4]};
+   if(x[3]==='ef'&&x[4][0]==='4'){it.g=x[4];it.skipped=(S.skipped[x[4]]||[]).includes(date+'@'+x[1]);it.ci=it.skipped?null:classInfo(x[4],date,x[1])}
+   return it}).sort((a,b)=>a.start.localeCompare(b.start))}
+
+/* ===================== VISTAS ===================== */
+const $app=document.getElementById('app'),$tabs=document.getElementById('tabs');
+function render(){
+ const T=[['agenda','Agenda'],['sda','SdA'],['eval','Evaluar'],['aj','Ajustes']];
+ $tabs.innerHTML=T.map(t=>`<button data-a="tab" data-v="${t[0]}" class="${UI.tab===t[0]?'on':''}">${t[1]}</button>`).join('');
+ let h='';
+ if(UI.tab==='agenda')h=vAgenda();else if(UI.tab==='sda')h=vSda();else if(UI.tab==='eval')h=vEval();else h=vAj();
+ if(UI.sheet)h+=vSheet();
+ $app.innerHTML=h;
+}
+function vAgenda(){
+ if(!UI.date){UI.date=lectivo(todayIso)?todayIso:(todayIso<START?START:(todayIso>END?END:addDays(todayIso,1)))}
+ const mon=addDays(UI.date,-((parse(UI.date).getDay()+6)%7));
+ let days='';for(let i=0;i<5;i++){const d=addDays(mon,i);days+=`<button data-a="day" data-v="${d}" class="${d===UI.date?'on':''} ${d===todayIso?'today':''}">${DOWS[parse(d).getDay()]}<b>${parse(d).getDate()}</b></button>`}
+ const items=dayItems(UI.date);
+ let body='';
+ if(!lectivo(UI.date))body=`<div class="card mute">${HOL[UI.date]||(parse(UI.date).getDay()%6===0?'Fin de semana':'Fuera del periodo')}. Sin clases.</div>`;
+ else body=items.map((it,idx)=>{
+   const time=`<div class="t">${it.start}<span>${it.end}</span></div>`;
+   if(it.kind==='ef'&&it.g){
+     if(it.skipped)return `<div class="card ev" style="opacity:.6">${time}<div><h3>${esc(it.g)} · suspendida</h3><button class="btn sm" data-a="unskip" data-g="${esc(it.g)}" data-k="${UI.date}@${it.start}">Recuperar clase</button></div></div>`;
+     const c=it.ci;
+     if(c&&c.sda){const s=SDA[c.sda].ses[c.s-1];return `<div class="card ev tap s${c.sda}" data-a="open" data-g="${esc(it.g)}" data-d="${UI.date}" data-s="${it.start}">${time}<div><h3>${esc(it.g)}</h3><span class="tag tg${c.sda}">SdA ${c.sda} · sesión ${c.s}/6</span> ${S.done[it.g+'|'+UI.date+it.start]?'<span class="tag" style="color:var(--ok)">hecha</span>':''}<div style="margin-top:4px">${esc(s.t)}</div></div></div>`}
+     return `<div class="card ev tap" data-a="open" data-g="${esc(it.g)}" data-d="${UI.date}" data-s="${it.start}">${time}<div><h3>${esc(it.g)}</h3><span class="mute">Clase de reserva / repaso</span></div></div>`}
+   const nm=it.kind==='ef'?'Edu. Física '+it.label:it.label;
+   return `<div class="card ev" style="${it.kind==='gu'||it.kind==='re'?'opacity:.75':''}">${time}<div><h3>${esc(nm)}</h3>${it.kind==='ef'?'<span class="mute small">1º ESO</span>':''}</div></div>`}).join('');
+ return `<div class="top"><h1>Agenda</h1><div class="row"><button class="btn sm" data-a="wk" data-v="-7">‹ sem.</button><button class="btn sm" data-a="today">Hoy</button><button class="btn sm" data-a="wk" data-v="7">sem. ›</button></div></div>
+ <div class="days">${days}</div><h2 style="margin-bottom:8px">${fmt(UI.date)}</h2>${body}`}
+function vSda(){
+ return `<div class="top"><h1>Situaciones de aprendizaje</h1></div>`+[1,2].map(n=>{const d=SDA[n];
+  return `<div class="card s${n}" style="border-left:6px solid var(--sda${n})"><h2>${esc(d.name)}</h2><div class="mute small" style="margin:2px 0 8px">${esc(d.full)}${d.draft?' · <b>BORRADOR</b> (detalle por afinar)':''}</div>
+  ${d.ses.map((s,i)=>`<div class="blk" style="cursor:pointer" data-a="osda" data-n="${n}" data-i="${i}"><div class="m"><small>ses.</small>${i+1}</div><div>${esc(s.t)}</div></div>`).join('')}
+  <div class="small mute" style="margin-top:6px">Evaluables: ${d.acts.map(a=>esc(a.name)).join(' · ')}</div></div>`}).join('')}
+function sessionHTML(n,i,ctx){
+ const s=SDA[n].ses[i];const tot=s.b.reduce((a,b)=>a+b[0],0);
+ return `<h2>${esc(s.t)}</h2><div class="small mute" style="margin:2px 0 6px"><span class="tag tg${n}">SdA ${n} · sesión ${i+1}/6</span> ${tot} min</div>
+ <div class="note"><b>Objetivo.</b> ${esc(s.obj)}</div>
+ <div class="card">${s.b.map(b=>`<div class="blk"><div class="m">${b[0]}<small>min</small></div><div><b>${esc(b[1])}</b>${b[2]?'<div class="mute">'+esc(b[2])+'</div>':''}</div></div>`).join('')}</div>
+ <div class="card"><b>Material.</b> ${esc(s.mat)}<br><b>Evaluación.</b> ${esc(s.ev)}</div>`}
+function vSheet(){
+ const u=UI.sheet;
+ if(u.type==='sda'){return `<div class="sheet"><div><div class="bar"><button class="btn" data-a="close">‹ Volver</button></div>${sessionHTML(u.n,u.i)}</div></div>`}
+ const c=classInfo(u.g,u.d,u.s);const key=u.g+'|'+u.d+u.s;
+ let h=`<div class="sheet"><div><div class="bar row"><button class="btn" data-a="close">‹ Volver</button><span class="sp"></span><span class="mute">${esc(u.g)} · ${fmt(u.d)} · ${u.s}</span></div>`;
+ if(c&&c.sda)h+=sessionHTML(c.sda,c.s-1);
+ else h+=`<h2>Clase de reserva / repaso</h2><div class="card mute">Las 12 sesiones de los dos SdA ya están cubiertas. Úsala para recuperar, repasar o terminar evaluaciones pendientes.</div>`;
+ h+=`<div class="card"><label class="small mute">Notas de la clase</label><textarea data-a="note" data-k="${esc(key)}" placeholder="Qué ha pasado, qué repetir…">${esc(S.notes[key]||'')}</textarea>
+ <div class="row" style="margin-top:8px"><button class="btn ${S.done[key]?'pri':''}" data-a="done" data-k="${esc(key)}">${S.done[key]?'✓ Hecha':'Marcar como hecha'}</button>
+ <button class="btn" data-a="skip" data-g="${esc(u.g)}" data-k="${u.d}@${u.s}">No se imparte (desplazar)</button>
+ <button class="btn" data-a="goeval" data-g="${esc(u.g)}">Evaluar grupo</button></div>
+ <div class="small mute" style="margin-top:6px">«No se imparte» quita esta clase y adelanta el resto de sesiones del grupo.</div></div></div></div>`;
+ return h}
+function vEval(){
+ const g=UI.evG;const sdaN=(classes(g).filter(c=>c.date<=todayIso).slice(-1)[0]||{}).sda||1;
+ const acts=[...SDA[1].acts.map(a=>({...a,sda:1})),...SDA[2].acts.map(a=>({...a,sda:2}))];
+ let a=acts.find(x=>x.id===UI.evA)||acts[0];
+ const R=S.roster[g]||[];
+ let h=`<div class="top"><h1>Evaluar</h1></div>
+ <div class="chips">${GROUPS.map(x=>`<button class="chip ${x===g?'on':''}" data-a="evg" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+ <select data-a="eva">${acts.map(x=>`<option value="${x.id}" ${x.id===a.id?'selected':''}>SdA ${x.sda} · ${esc(x.name)}</option>`).join('')}</select>
+ <div class="small mute" style="margin:6px 0 8px">${esc(a.desc)} (${esc(a.ses)})</div>`;
+ if(!R.length)return h+`<div class="card"><b>Aún no hay alumnado en ${esc(g)}.</b><div class="small mute" style="margin:4px 0 8px">Pega la lista (una línea por alumno). Mejor solo nombre de pila o iniciales.</div><textarea id="rost" placeholder="Ana&#10;Luis&#10;…"></textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(g)}">Guardar lista</button></div>`;
+ const iN=a.inds.length;if(UI.evI>iN)UI.evI=0;
+ h+=`<div class="chips">${a.inds.map((x,i)=>`<button class="chip ${UI.evI===i?'on':''}" data-a="evi" data-v="${i}">${esc(x)}</button>`).join('')}<button class="chip ${UI.evI===iN?'on':''}" data-a="evi" data-v="${iN}">Resumen</button></div>`;
+ if(UI.evI<iN){
+  if(a.lv)h+=`<div class="legend">${a.lv.map((l,i)=>`<i style="background:var(--l${i+1});color:var(--l${i+1}f)">${i+1} ${esc(l)}</i>`).join('')}</div>`;
+  h+=`<div class="card">`+R.map((n,si)=>{
+    const sc=(S.scores[g+'|'+a.id+'|'+si]||{});const v=sc[UI.evI];
+    let btns;
+    if(a.lv){btns=`<div class="btns">${a.lv.map((l,i)=>`<button class="v${i+1} ${v===i+1?'on':''}" data-a="sc" data-s="${si}" data-v="${i+1}">${i+1}</button>`).join('')}</div>`}
+    else{btns=`<div class="btns n10">${[0,1,2,3,4,5,6,7,8,9,10].map(i=>`<button class="vn ${v===i?'on':''}" data-a="sc" data-s="${si}" data-v="${i}">${i}</button>`).join('')}</div><div class="row" style="margin-top:4px"><button class="btn sm ${sc.h?'pri':''}" data-a="half" data-s="${si}">+ ½ punto</button></div>`}
+    const show=v==null?'–':(a.lv?a.lv[v-1]:(v+(sc.h?0.5:0)));
+    return `<div class="st"><div class="nm"><span>${esc(n)}</span><span class="mute small">${esc(show)}</span></div>${btns}</div>`}).join('')+`</div>`;
+ }else{
+  h+=`<div class="card scroll"><table><tr><th>Alumno/a</th>${a.lv?a.inds.map(x=>`<th>${esc(x.slice(0,4))}</th>`).join(''):''}<th>Nota</th></tr>`+R.map((n,si)=>{
+    const nt=grade(g,a,si);return `<tr><td>${esc(n)}</td>${a.lv?a.inds.map((x,i)=>`<td>${(S.scores[g+'|'+a.id+'|'+si]||{})[i]||'–'}</td>`).join(''):''}<td class="nota">${nt==null?'–':nt}</td></tr>`}).join('')+`</table></div>
+  <div class="row"><button class="btn pri" data-a="copynotas">Copiar notas (para Séneca)</button><button class="btn" data-a="clearscores" data-g="${esc(g)}" data-id="${a.id}">Borrar esta evaluación</button></div><div id="cpy" class="small mute" style="margin-top:6px"></div>`;
+ }
+ return h}
+function grade(g,a,si){
+ const sc=S.scores[g+'|'+a.id+'|'+si];if(!sc)return null;
+ if(!a.lv){if(sc[0]==null)return null;return Math.min(10,sc[0]+(sc.h?0.5:0))}
+ const vals=a.inds.map((x,i)=>sc[i]).filter(v=>v!=null);if(!vals.length)return null;
+ return Math.round(vals.reduce((p,q)=>p+q,0)/vals.length/a.max*100)/10}
+function vAj(){
+ return `<div class="top"><h1>Ajustes</h1></div>
+ <div class="card"><h3>Calendario del iPhone</h3><div class="small mute" style="margin:4px 0 8px">Genera un archivo .ics con tu horario (2 nov – 22 dic), con la sesión de SdA de cada clase de 4º. Al abrirlo desde Archivos en el iPhone se añade a Calendario.</div><button class="btn pri" data-a="ics">Descargar calendario (.ics)</button><div id="icsmsg" class="small mute" style="margin-top:6px"></div></div>
+ <div class="card"><h3>Alumnado</h3><div class="small mute" style="margin:4px 0 8px">Solo nombre de pila o iniciales. Un grupo por pestaña de «Evaluar».</div>
+ ${GROUPS.map(g=>`<div class="row" style="margin:4px 0"><b>${esc(g)}</b><span class="mute small">${(S.roster[g]||[]).length} alumnos</span><span class="sp"></span><button class="btn sm" data-a="editroster" data-g="${esc(g)}">Editar</button></div>`).join('')}
+ ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
+ <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo de 4º tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan).</div></div>`}
+
+/* ===================== ICS ===================== */
+function icsText(){
+ const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Cuaderno EF Cantely//ES','CALSCALE:GREGORIAN','X-WR-CALNAME:Clases IES Cantely'];
+ const ds=t=>t.replace(/-/g,'').replace(':','');
+ const tz=(d,t)=>d.replace(/-/g,'')+'T'+t.replace(':','')+'00';
+ let d=START;let n=0;
+ while(d<=END){ if(lectivo(d)){ dayItems(d).forEach(it=>{
+   let title=it.kind==='ef'?'EF '+it.label:it.label;let desc='';
+   if(it.g){ if(it.skipped)return; const c=it.ci; if(c&&c.sda){const s=SDA[c.sda].ses[c.s-1];title='EF '+gk(it.g)+' · SdA'+c.sda+' S'+c.s;desc=s.t+'\\n'+s.obj} else title='EF '+gk(it.g)+' · reserva'}
+   L.push('BEGIN:VEVENT','UID:ef'+(n++)+'-'+d+it.start.replace(':','')+'@cantely','DTSTAMP:20261030T000000','DTSTART:'+tz(d,it.start),'DTEND:'+tz(d,it.end),'SUMMARY:'+title.replace(/[,;]/g,' '),'LOCATION:IES Cantely'+(desc?'':''),desc?'DESCRIPTION:'+desc.replace(/[,;]/g,' '):'','END:VEVENT')})}
+   d=addDays(d,1)}
+ L.push('END:VCALENDAR');return L.filter(Boolean).join('\r\n')}
+
+/* ===================== EVENTOS ===================== */
+document.addEventListener('click',async e=>{
+ const el=e.target.closest('[data-a]');if(!el||el.tagName==='TEXTAREA'||el.tagName==='SELECT')return;
+ const a=el.dataset.a,D=el.dataset;
+ if(a==='tab'){UI.tab=D.v;UI.sheet=null}
+ else if(a==='day')UI.date=D.v;
+ else if(a==='wk'){let d=addDays(UI.date,+D.v);UI.date=d}
+ else if(a==='today')UI.date=null;
+ else if(a==='open')UI.sheet={type:'cls',g:D.g,d:D.d,s:D.s};
+ else if(a==='osda')UI.sheet={type:'sda',n:+D.n,i:+D.i};
+ else if(a==='close')UI.sheet=null;
+ else if(a==='done'){S.done[D.k]=!S.done[D.k];save()}
+ else if(a==='skip'){(S.skipped[D.g]=S.skipped[D.g]||[]).push(D.k);Object.keys(_cache).forEach(k=>delete _cache[k]);UI.sheet=null;save()}
+ else if(a==='unskip'){S.skipped[D.g]=(S.skipped[D.g]||[]).filter(x=>x!==D.k);Object.keys(_cache).forEach(k=>delete _cache[k]);save()}
+ else if(a==='goeval'){UI.evG=D.g;UI.tab='eval';UI.sheet=null}
+ else if(a==='evg'){UI.evG=D.v;UI.evI=0}
+ else if(a==='evi')UI.evI=+D.v;
+ else if(a==='sc'){const key=UI.evG+'|'+UI.evA+'|'+D.s;const sc=S.scores[key]=S.scores[key]||{};if(sc[UI.evI]===+D.v)delete sc[UI.evI];else sc[UI.evI]=+D.v;save()}
+ else if(a==='half'){const key=UI.evG+'|'+UI.evA+'|'+D.s;const sc=S.scores[key]=S.scores[key]||{};sc.h=!sc.h;save()}
+ else if(a==='saveroster'){const t=document.getElementById('rost').value.split('\n').map(x=>x.trim()).filter(Boolean);S.roster[D.g]=t;UI.editG=null;save()}
+ else if(a==='editroster')UI.editG=D.g;
+ else if(a==='clearscores'){Object.keys(S.scores).filter(k=>k.startsWith(D.g+'|'+D.id+'|')).forEach(k=>delete S.scores[k]);save()}
+ else if(a==='copynotas'){
+   const acts=[...SDA[1].acts,...SDA[2].acts];const ac=acts.find(x=>x.id===UI.evA);
+   const txt=(S.roster[UI.evG]||[]).map((n,i)=>{const g=grade(UI.evG,ac,i);return n+'\t'+(g==null?'':String(g).replace('.',','))}).join('\n');
+   let ok=false;try{await navigator.clipboard.writeText(txt);ok=true}catch(err){}
+   document.getElementById('cpy').innerHTML=ok?'Copiado. Pégalo en Notas o en Séneca.':'No se pudo copiar. Selecciona el texto:<textarea readonly>'+esc(txt)+'</textarea>';return}
+ else if(a==='ics'){
+   const msg=document.getElementById('icsmsg');const txt=icsText();
+   try{const bl=new Blob([txt],{type:'text/calendar'});const url=URL.createObjectURL(bl);const a=document.createElement('a');a.href=url;a.download='clases-cantely.ics';document.body.appendChild(a);a.click();a.remove();msg.textContent='Listo. Ábrelo desde Archivos (o la notificación de descargas) para añadirlo a Calendario.';return}catch(err){}
+   msg.innerHTML='Descarga no disponible. Copia este texto en un archivo .ics:<textarea readonly>'+esc(txt)+'</textarea>';return}
+ render()});
+document.addEventListener('change',e=>{const el=e.target;if(el.dataset.a==='eva'){UI.evA=el.value;UI.evI=0;render()}});
+document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.a==='note'){S.notes[el.dataset.k]=el.value;save()}});
+render();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body></html>
