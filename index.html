@@ -258,7 +258,7 @@ function vSheet(){
 
  {const R=S.roster[u.g]||[];const at=(S.att||{})[key]||{};
  h+=`<div class="card"><h3>Comportamiento y actitud</h3>`;
- if(!R.length)h+=`<div class="small mute" style="margin:4px 0 8px">Aún no hay alumnado en ${esc(u.g)}. Impórtalo en Ajustes → Alumnado.</div>`;
+ if(!R.length)h+=`<div class="small mute" style="margin:4px 0 8px">Aún no hay alumnado cargado. Pega aquí el texto de todas las listas (el archivo alumnado_cuaderno.txt) y pulsa Importar. Solo se hace una vez.</div><textarea id="imp" placeholder="## 1ºC&#10;Ana L.&#10;…"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>`;
  else{h+=`<div class="legend">${ATTLV.map((l,i)=>`<i style="background:var(--l${i+1});color:var(--l${i+1}f)">${i+1} ${esc(l)}</i>`).join('')}</div><div class="row" style="margin:6px 0"><button class="btn sm" data-a="attall" data-k="${esc(key)}" data-n="${R.length}">Todos «Bien» (3)</button><button class="btn sm" data-a="attclr" data-k="${esc(key)}">Borrar</button></div>`+R.map((n,si)=>`<div class="st"><div class="nm"><span>${esc(n)}</span><span class="mute small">${at[si]?ATTLV[at[si]-1]:'–'}</span></div><div class="btns">${ATTLV.map((l,i)=>`<button class="v${i+1} ${at[si]===i+1?'on':''}" data-a="att" data-k="${esc(key)}" data-s="${si}" data-v="${i+1}">${i+1}</button>`).join('')}</div></div>`).join('')}
  h+=`<div class="small mute" style="margin-top:6px">Se guarda por clase. La nota de «Comportamiento y actitud» sale de la media de las clases de la unidad.</div></div>`}
  h+=`<div class="card"><label class="small mute">Notas de la clase</label><textarea data-a="note" data-k="${esc(key)}" placeholder="Qué ha pasado, qué repetir…">${esc(S.notes[key]||'')}</textarea>
@@ -313,7 +313,7 @@ function vAj(){
  <textarea id="imp" style="margin-top:8px" placeholder="Pega aquí todas las listas:&#10;## 1ºC&#10;Ana L.&#10;Luis P.&#10;## 1ºD …"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · c</div></div>`}
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · d</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
@@ -351,7 +351,7 @@ document.addEventListener('click',async e=>{
    let ok=false;try{await navigator.clipboard.writeText(txt);ok=true}catch(err){}
    document.getElementById('cpy').innerHTML=ok?'Copiado.':'No se pudo copiar. Selecciona el texto:<textarea readonly>'+esc(txt)+'</textarea>';return}
  else if(a==='importroster'){const t=document.getElementById('imp').value;let g=null,n=0;const R={};t.split('\n').forEach(l=>{l=l.trim();if(!l)return;if(l.startsWith('##')){g=l.replace(/^#+/,'').trim();R[g]=[];return}if(g)R[g].push(l)});
-   Object.keys(R).forEach(k=>{if(GROUPS.includes(k)&&R[k].length){S.roster[k]=R[k];n++}});save();render();document.getElementById('impmsg').textContent=n?('Importadas '+n+' listas.'):'No se ha reconocido ningún grupo. Cada lista debe empezar por una línea como «## 1ºC».';return}
+   Object.keys(R).forEach(k=>{if(GROUPS.includes(k)&&R[k].length){S.roster[k]=R[k];n++}});save();render();{const m=document.getElementById('impmsg');if(m)m.textContent=n?('Importadas '+n+' listas.'):'No se ha reconocido ningún grupo. Cada lista debe empezar por una línea como «## 1ºC».'};return}
  else if(a==='goeval'){UI.evG=D.g;UI.tab='eval';UI.sheet=null}
  else if(a==='evg'){UI.evG=D.v;UI.evI=0}
  else if(a==='evi')UI.evI=+D.v;
