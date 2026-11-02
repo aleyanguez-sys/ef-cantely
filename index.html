@@ -235,6 +235,7 @@ function vSda(){
 function sessionHTML(n,i,ctx){
  const s=SDA[n].ses[i];const tot=s.b.reduce((a,b)=>a+b[0],0);
  return `<h2>${esc(s.t)}</h2><div class="small mute" style="margin:2px 0 6px"><span class="tag tg${n}">SdA ${n} · sesión ${i+1}/6</span> ${tot} min</div>
+ <div style="margin:0 0 8px"><button class="btn pri" data-a="clock" data-k="${n}-${i}">⏱ Reloj / cronómetro</button></div>
  <div class="note"><b>Objetivo.</b> ${esc(s.obj)}</div>
  <div class="card">${s.b.map(b=>`<div class="blk"><div class="m">${b[0]}<small>min</small></div><div><b>${esc(b[1])}</b>${b[2]?'<div class="mute">'+esc(b[2])+'</div>':''}</div></div>`).join('')}</div>
  <div class="card"><b>Material.</b> ${esc(s.mat)}<br><b>Evaluación.</b> ${esc(s.ev)}${s.pdf?`<div style="margin-top:8px"><a class="btn pri" style="display:inline-block;text-decoration:none" href="${BASEURL+s.pdf[1]}" target="_blank" rel="noopener">📄 ${esc(s.pdf[0])}</a></div>`:''}</div>`}
@@ -338,7 +339,7 @@ function vAj(){
  <textarea id="imp" style="margin-top:8px" placeholder="Pega aquí todas las listas:&#10;## 1ºC&#10;Ana L.&#10;Luis P.&#10;## 1ºD …"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · l</div></div>`}
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · m</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
@@ -354,9 +355,72 @@ function icsText(){
  L.push('END:VCALENDAR');return L.filter(Boolean).join('\r\n')}
 
 /* ===================== EVENTOS ===================== */
+/* ===== Reloj de clase (tabata, AMRAP, rotación) ===== */
+function rep(n,arr){let o=[];for(let k=0;k<n;k++)arr.forEach(x=>o.push(x));return o}
+const CLKP={
+'1-2':[{n:'AMRAP 10\' + 10\' (cambio de papeles)',ph:[['Turno 1: ejecuta',600,'w'],['Cambio de papeles',20,'r'],['Turno 2: ejecuta',600,'w']]}],
+'1-3':[{n:'Rotación de estaciones: 6 × (2\' + 1\' cambio)',ph:rep(6,[['Estación',120,'w'],['Cambio',60,'r']])}],
+'1-4':[{n:'Intercambio de circuitos: 6 × (3\' + 1\' cambio)',ph:rep(6,[['Circuito',180,'w'],['Cambio de equipo',60,'r']])}],
+'1-5':[{n:'Mini Hyrox: 6 × (2\' + 1\' cambio)',ph:rep(6,[['Estación',120,'w'],['Cambio',60,'r']])},{n:'Examen: 20 min',ph:[['Examen',1200,'w']]}]};
+const CLKG=[
+{n:'Tabata 20" / 10" × 8',ph:rep(8,[['Trabajo',20,'w'],['Descanso',10,'r']])},
+{n:'EMOM 1\' × 10',ph:rep(10,[['Minuto',60,'w']])},
+{n:'Cuenta atrás 5 min',ph:[['Tiempo',300,'w']]},
+{n:'Cuenta atrás 10 min',ph:[['Tiempo',600,'w']]},
+{n:'Cuenta atrás 15 min',ph:[['Tiempo',900,'w']]},
+{n:'Cronómetro',ph:[['Cronómetro',0,'w']]}];
+let CK={ph:[],i:0,end:0,left:0,run:false,view:'list',key:'',ac:null,tm:null,lastBeep:-1,cw:20,cr:10,cn:8};
+function ckBeep(f,d){try{if(!CK.ac)CK.ac=new (window.AudioContext||window.webkitAudioContext)();const o=CK.ac.createOscillator(),g=CK.ac.createGain();o.frequency.value=f;g.gain.value=.25;o.connect(g);g.connect(CK.ac.destination);o.start();o.stop(CK.ac.currentTime+d)}catch(e){}}
+function ckVib(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+function ckFmt(ms){const s=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function ckStartPhase(){const p=CK.ph[CK.i];if(!p){return}CK.up=p[1]===0;CK.left=p[1]*1000;CK.start=Date.now();CK.end=Date.now()+CK.left;CK.lastBeep=-1}
+function ckStart(ph){CK.ph=ph;CK.i=0;CK.view='run';CK.run=true;ckStartPhase();ckBeep(880,.25);ckVib(100);try{navigator.wakeLock&&navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}ckLoop();ckDraw()}
+function ckLoop(){clearInterval(CK.tm);CK.tm=setInterval(ckTick,200)}
+function ckTick(){if(!CK.run)return;const p=CK.ph[CK.i];if(!p)return;
+ if(CK.up){ckPaint(Date.now()-CK.start);return}
+ const left=CK.end-Date.now();
+ const sec=Math.ceil(left/1000);
+ if(sec<=3&&sec>=1&&CK.lastBeep!==sec){CK.lastBeep=sec;ckBeep(660,.12);ckVib(40)}
+ if(left<=0){CK.i++;if(CK.i>=CK.ph.length){CK.run=false;CK.done=true;clearInterval(CK.tm);ckBeep(1040,.8);ckVib([300,100,300]);ckDraw();return}
+  ckStartPhase();ckBeep(880,.35);ckVib(200);ckDraw();return}
+ ckPaint(left)}
+function ckPaint(ms){const e=document.getElementById('ckt');if(e)e.textContent=ckFmt(ms)}
+function ckDraw(){let el=document.getElementById('clk');if(!el){el=document.createElement('div');el.id='clk';document.body.appendChild(el);el.addEventListener('click',ckClick)}
+ const st='position:fixed;inset:0;z-index:100;background:#101114;color:#fff;overflow:auto;padding:max(16px,env(safe-area-inset-top,0px)) 16px 24px;font-family:inherit';
+ el.style.cssText=st;
+ const B='style="background:#2a2c33;color:#fff;border:1px solid #444;border-radius:12px;padding:12px 14px;font-weight:700;font-size:16px;text-align:left;width:100%;margin:0 0 8px"';
+ if(CK.view==='list'){
+  const pr=(CLKP[CK.key]||[]);
+  el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><b style="font-size:22px">⏱ Reloj</b><button data-k="close" style="background:#2a2c33;color:#fff;border:1px solid #444;border-radius:12px;padding:10px 14px;font-weight:700">Cerrar</button></div>`
+  +(pr.length?`<div style="color:#aaa;margin-bottom:6px">De esta sesión</div>`+pr.map((p,i)=>`<button data-k="pre" data-i="${i}" ${B.replace('background:#2a2c33','background:#c2410c')}>${esc(p.n)}</button>`).join(''):'')
+  +`<div style="color:#aaa;margin:10px 0 6px">Otros</div>`+CLKG.map((p,i)=>`<button data-k="gen" data-i="${i}" ${B}>${esc(p.n)}</button>`).join('')
+  +`<div style="color:#aaa;margin:10px 0 6px">Personalizado (intervalos)</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label>Trabajo s <input id="cw" type="number" value="${CK.cw}" style="width:64px;font-size:16px"></label><label>Descanso s <input id="cr" type="number" value="${CK.cr}" style="width:64px;font-size:16px"></label><label>Rondas <input id="cn" type="number" value="${CK.cn}" style="width:64px;font-size:16px"></label></div><button data-k="cus" ${B.replace('margin:0 0 8px','margin:10px 0 0')}>Empezar</button>`;
+  return}
+ const p=CK.ph[CK.i]||CK.ph[CK.ph.length-1]||['',0,'w'];
+ const w=CK.ph.filter(x=>x[2]==='w').length;const wi=CK.ph.slice(0,CK.i+1).filter(x=>x[2]==='w').length;
+ const col=CK.done?'#1d4ed8':(p[2]==='r'?'#b45309':'#15803d');
+ const nx=CK.ph[CK.i+1];
+ el.innerHTML=`<div style="min-height:100%;display:flex;flex-direction:column;gap:14px;background:${col};margin:-16px;padding:16px;padding-top:max(16px,env(safe-area-inset-top,0px))">
+  <div style="display:flex;justify-content:space-between"><b>${CK.done?'Terminado':esc(p[0])}</b><span>${CK.done?'':(w>1?'Ronda '+wi+' / '+w:'')}</span></div>
+  <div id="ckt" style="font-size:min(30vw,150px);font-weight:800;text-align:center;font-variant-numeric:tabular-nums;line-height:1.1;margin:auto 0">${CK.done?'00:00':ckFmt(CK.up?0:CK.left)}</div>
+  <div style="text-align:center;opacity:.85;min-height:24px">${!CK.done&&nx?'Siguiente: '+esc(nx[0])+' '+(nx[1]?ckFmt(nx[1]*1000):''):''}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+   ${CK.done?'':`<button data-k="pp" style="flex:1;${'background:#101114;color:#fff;border:0;border-radius:12px;padding:16px;font-weight:700;font-size:18px'}">${CK.run?'Pausa':'Seguir'}</button><button data-k="skip" style="flex:1;background:#101114;color:#fff;border:0;border-radius:12px;padding:16px;font-weight:700;font-size:18px">Saltar ›</button>`}
+   <button data-k="back" style="flex:1;background:#101114;color:#fff;border:0;border-radius:12px;padding:16px;font-weight:700;font-size:18px">Menú</button></div></div>`}
+function ckClick(e){const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k;
+ if(k==='close'){const c=document.getElementById('clk');clearInterval(CK.tm);CK.run=false;c&&c.remove();return}
+ if(k==='pre')return ckStart(CLKP[CK.key][+b.dataset.i].ph);
+ if(k==='gen')return ckStart(CLKG[+b.dataset.i].ph);
+ if(k==='cus'){CK.cw=+document.getElementById('cw').value||20;CK.cr=+document.getElementById('cr').value||0;CK.cn=+document.getElementById('cn').value||1;return ckStart(rep(CK.cn,CK.cr?[['Trabajo',CK.cw,'w'],['Descanso',CK.cr,'r']]:[['Trabajo',CK.cw,'w']]))}
+ if(k==='pp'){if(CK.run){CK.run=false;if(!CK.up)CK.left=CK.end-Date.now();else CK.el=Date.now()-CK.start}else{CK.run=true;if(CK.up)CK.start=Date.now()-(CK.el||0);else CK.end=Date.now()+CK.left}ckDraw();return}
+ if(k==='skip'){CK.i++;if(CK.i>=CK.ph.length){CK.run=false;CK.done=true;ckBeep(1040,.8)}else{ckStartPhase();ckBeep(880,.2)}ckDraw();return}
+ if(k==='back'){clearInterval(CK.tm);CK.run=false;CK.done=false;CK.view='list';ckDraw();return}}
+function openClock(key){CK.key=key||'';CK.done=false;if(!CK.run||CK.view!=='run')CK.view='list';ckDraw()}
+
 document.addEventListener('click',async e=>{
  const el=e.target.closest('[data-a]');if(!el||el.tagName==='TEXTAREA'||el.tagName==='SELECT')return;
  const a=el.dataset.a,D=el.dataset;
+ if(a==='clock'){openClock(D.k);return}
  if(a==='tab'){UI.tab=D.v;UI.sheet=null}
  else if(a==='day')UI.date=D.v;
  else if(a==='wk'){let d=addDays(UI.date,+D.v);UI.date=d}
