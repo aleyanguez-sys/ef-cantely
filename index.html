@@ -101,14 +101,14 @@ const SDA={
      [5,'Explicación del circuito y de la ficha','Ficha de evaluación recíproca: qué se observa en cada ejercicio y cómo se marca.'],
      [22,'Circuito AMRAP de 10\' + 10\' (cambio de papeles)','Una mochila por pareja. 10 min seguidos: sentadilla ×10 · press ×8 · peso muerto ×10 · zancadas ×8 por pierna · remo ×10 y vuelta a empezar. Uno ejecuta y el otro evalúa la técnica en la ficha y cuenta las rondas; 2 min de cambio.'],
      [8,'Vuelta a la calma y puesta en común','Estiramiento + RPE. Cada pareja comenta una cosa bien y una a mejorar.']],
-  mat:'Una mochila por pareja, colchonetas, cronómetro, fichas de evaluación recíproca impresas (una por pareja).',ev:'Coevaluación en pareja (ficha de evaluación recíproca) + Observación: Comportamiento y actitud (sesión 3).'},
+  mat:'Una mochila por pareja, colchonetas, cronómetro, fichas de evaluación recíproca impresas (una por pareja).',pdf:['Ficha de evaluación recíproca (imprimir)','ficha_evaluacion_reciproca.pdf'],ev:'Coevaluación en pareja (ficha de evaluación recíproca) + Observación: Comportamiento y actitud (sesión 3).'},
  {t:'Hyrox I: conocemos el formato y diseñamos',obj:'Entender el formato Hyrox, probar estaciones adaptadas al material del centro y empezar a diseñar el circuito en la ficha.',
   b:[[8,'Calentamiento','Carrera continua 3\' + movilidad + progresiones.'],
      [10,'Explicación del Hyrox','8 rondas: carrera + estación. Aquí lo adaptamos con el material del cole.'],
      [22,'Rotación de estaciones adaptadas','Empuje de colchoneta · arrastre de cuerda con colchoneta · burpee broad jump · remo con goma · transporte de mochilas · zancadas con mochila. 2\' trabajo + 1\' cambio.'],
      [10,'Diseño en la ficha','Cada equipo elige sus 6 estaciones, tiempos, normas de seguridad y escalado.'],
      [5,'Vuelta a la calma + RPE','']],
-  mat:'Colchonetas, cuerdas, gomas, mochilas, balones medicinales, fichas.',ev:'EVALÚA: Ficha Hyrox (progreso) + Actitud.'},
+  mat:'Colchonetas, cuerdas, gomas, mochilas, balones medicinales, fichas.',pdf:['Ficha del circuito Hyrox (imprimir, una por equipo de 4)','ficha_circuito_hyrox.pdf'],ev:'EVALÚA: Ficha Hyrox (progreso) + Actitud.'},
  {t:'Hyrox II: cerramos la ficha e intercambiamos circuitos',obj:'Cerrar la ficha, montar el circuito y probar el de otro equipo con feedback.',
   b:[[8,'Calentamiento',''],
      [15,'Cerrar y entregar la ficha','Revisar con lista de cotejo: seguridad, claridad, organización.'],
@@ -235,7 +235,7 @@ function sessionHTML(n,i,ctx){
  return `<h2>${esc(s.t)}</h2><div class="small mute" style="margin:2px 0 6px"><span class="tag tg${n}">SdA ${n} · sesión ${i+1}/6</span> ${tot} min</div>
  <div class="note"><b>Objetivo.</b> ${esc(s.obj)}</div>
  <div class="card">${s.b.map(b=>`<div class="blk"><div class="m">${b[0]}<small>min</small></div><div><b>${esc(b[1])}</b>${b[2]?'<div class="mute">'+esc(b[2])+'</div>':''}</div></div>`).join('')}</div>
- <div class="card"><b>Material.</b> ${esc(s.mat)}<br><b>Evaluación.</b> ${esc(s.ev)}</div>`}
+ <div class="card"><b>Material.</b> ${esc(s.mat)}<br><b>Evaluación.</b> ${esc(s.ev)}${s.pdf?`<div style="margin-top:8px"><a class="btn pri" style="display:inline-block;text-decoration:none" href="${BASEURL+s.pdf[1]}" target="_blank" rel="noopener">📄 ${esc(s.pdf[0])}</a></div>`:''}</div>`}
 function vSheet(){
  const u=UI.sheet;
  if(u.type==='rub'){const a=actsFor(u.g).find(x=>x.id===u.id);
@@ -261,6 +261,7 @@ function vSheet(){
  <button class="btn" data-a="goeval" data-g="${esc(u.g)}">Evaluar grupo</button></div>
  <div class="small mute" style="margin-top:6px">«No se imparte» quita esta clase y adelanta el resto de sesiones del grupo.</div></div></div></div>`;
  return h}
+const BASEURL='https://aleyanguez-sys.github.io/ef-cantely/';
 const ATTLV=['Mejorable','Suficiente','Bien','Excelente'];
 function attAvg(g,sda,si){let t=0,n=0;classes(g).forEach(c=>{if(c.sda!==sda)return;const v=((S.att||{})[g+'|'+c.date+c.start]||{})[si];if(v){t+=v;n++}});return n?t/n:null}
 const RUBD={3:['En proceso: lo intenta pero necesita ayuda y revisión.','Logrado: cumple lo pedido de forma autónoma.','Destacado: cumple con calidad y aporta ideas o ayuda al grupo.'],4:['Mejorable: no lo consigue o necesita ayuda constante.','Suficiente: lo consigue a veces o con ayuda.','Bien: lo consigue casi siempre de forma autónoma.','Excelente: lo consigue siempre y ayuda a los demás.']};
@@ -307,7 +308,7 @@ function vAj(){
  <textarea id="imp" style="margin-top:8px" placeholder="Pega aquí todas las listas:&#10;## 1ºC&#10;Ana L.&#10;Luis P.&#10;## 1ºD …"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · h</div></div>`}
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · i</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
