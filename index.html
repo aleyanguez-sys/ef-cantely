@@ -87,7 +87,7 @@ const TT=[
 const SDA={
 1:{name:'De las CFB al Hyrox',full:'Condición física: de las CFB al Hyrox y el CrossFit',draft:false,
  acts:[
-  {id:'ficha',name:'Ficha del circuito Hyrox',ses:'Se entrega en la sesión 3 · se evalúa en 4-5',inds:['Seguridad','Claridad','Organización','Trabajo en equipo'],lv:['En proceso','Logrado','Destacado'],max:3,desc:'Documento de proyecto en equipo: 6 estaciones, tiempos, normas de seguridad y escalado.'},
+  {id:'ficha',name:'Ficha del circuito Hyrox',ses:'Sesiones 4-5',inds:['Seguridad','Claridad','Organización','Trabajo en equipo'],lv:['En proceso','Logrado','Destacado'],max:3,desc:'Documento de proyecto en equipo: 6 estaciones, tiempos, normas de seguridad y escalado.'},
   {id:'act1',name:'Comportamiento y actitud',ses:'Sesiones 1-6',inds:['Esfuerzo y participación','Respeto y normas','Material e higiene'],lv:['Mejorable','Suficiente','Bien','Excelente'],max:4,desc:'Observación continua a lo largo de las 6 sesiones.'},
   {id:'exam',name:'Examen escrito de CFB',ses:'Sesión 6 (20 min)',inds:['Nota'],lv:null,max:10,desc:'10 preguntas sobre CFB, fuerza, RPE, AMRAP y Hyrox.'}],
  ses:[
@@ -95,13 +95,13 @@ const SDA={
   b:[[10,'Calentamiento',''],[40,'Dinámicas de cohesión','Juegos cooperativos y de presentación.'],[5,'Vuelta a la calma','']],mat:'Según la dinámica.',ev:'Observación: Comportamiento y actitud (sesión 1).'},
  {t:'Juegos de velocidad y fuerza (realizada)',obj:'Experimentar las capacidades de velocidad y fuerza a través del juego.',
   b:[[10,'Calentamiento',''],[40,'Juegos de velocidad y de fuerza',''],[5,'Vuelta a la calma','']],mat:'Según los juegos.',ev:'Observación: Comportamiento y actitud (sesión 2).'},
- {t:'Fuerza en parejas: juegos y circuito AMRAP',obj:'Experimentar los tipos de fuerza con juegos por parejas y trabajar un circuito de fuerza AMRAP con mochila, con roles observador - ejecutante.',
+ {t:'Fuerza en parejas: juegos y circuito AMRAP',obj:'Experimentar los tipos de fuerza con juegos por parejas y trabajar un circuito de fuerza AMRAP de 10 minutos con mochila, con evaluación recíproca (uno ejecuta y el otro evalúa la técnica).',
   b:[[10,'Calentamiento','Movilidad + carrera suave + 2 rondas de 5 sentadillas y 5 flexiones escaladas.'],
-     [12,'Juegos de fuerza en parejas','Plancha: a ver quién aguanta más · pulso de brazos · empuje de espaldas · tirar de la mochila. Se cambia de pareja.'],
-     [20,'Circuito de fuerza AMRAP en parejas','Una mochila por pareja. Estaciones: sentadilla con mochila · press de mochila · peso muerto con mochila · zancadas con mochila · remo con mochila. Uno ejecuta y el otro observa y corrige; se anotan las rondas.'],
-     [8,'Entrega y explicación de la ficha','Ficha del circuito Hyrox: se forman equipos de 4 y se explica cómo se evalúa.'],
-     [5,'Vuelta a la calma y RPE','Estiramiento + RPE final.']],
-  mat:'Una mochila por pareja, colchonetas, cronómetro, fichas impresas (una por equipo).',ev:'Observación: Comportamiento y actitud (sesión 3). Se entrega la ficha del circuito Hyrox (se evalúa en las sesiones 4-5).'},
+     [10,'Juegos de fuerza en parejas','Plancha: a ver quién aguanta más · pulso de brazos · empuje de espaldas · tirar de la mochila. Se cambia de pareja.'],
+     [5,'Explicación del circuito y de la ficha','Ficha de evaluación recíproca: qué se observa en cada ejercicio y cómo se marca.'],
+     [22,'Circuito AMRAP de 10\' + 10\' (cambio de papeles)','Una mochila por pareja. 10 min seguidos: sentadilla ×10 · press ×8 · peso muerto ×10 · zancadas ×8 por pierna · remo ×10 y vuelta a empezar. Uno ejecuta y el otro evalúa la técnica en la ficha y cuenta las rondas; 2 min de cambio.'],
+     [8,'Vuelta a la calma y puesta en común','Estiramiento + RPE. Cada pareja comenta una cosa bien y una a mejorar.']],
+  mat:'Una mochila por pareja, colchonetas, cronómetro, fichas de evaluación recíproca impresas (una por pareja).',ev:'Coevaluación en pareja (ficha de evaluación recíproca) + Observación: Comportamiento y actitud (sesión 3).'},
  {t:'Hyrox I: conocemos el formato y diseñamos',obj:'Entender el formato Hyrox, probar estaciones adaptadas al material del centro y empezar a diseñar el circuito en la ficha.',
   b:[[8,'Calentamiento','Carrera continua 3\' + movilidad + progresiones.'],
      [10,'Explicación del Hyrox','8 rondas: carrera + estación. Aquí lo adaptamos con el material del cole.'],
@@ -307,7 +307,7 @@ function vAj(){
  <textarea id="imp" style="margin-top:8px" placeholder="Pega aquí todas las listas:&#10;## 1ºC&#10;Ana L.&#10;Luis P.&#10;## 1ºD …"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · g</div></div>`}
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · h</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
