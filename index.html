@@ -228,7 +228,7 @@ function vAgenda(){
      if(c&&c.sda){const s=SDA[c.sda].ses[c.s-1];return `<div class="card ev tap s${c.sda}" data-a="open" data-g="${esc(it.g)}" data-d="${UI.date}" data-s="${it.start}">${time}<div><h3>${esc(it.g)}</h3><span class="tag tg${c.sda}">SdA ${c.sda} · sesión ${c.s}/6</span> ${S.done[it.g+'|'+UI.date+it.start]?'<span class="tag" style="color:var(--ok)">hecha</span>':''}<div style="margin-top:4px">${esc(s.t)}</div></div></div>`}
      return `<div class="card ev tap" data-a="open" data-g="${esc(it.g)}" data-d="${UI.date}" data-s="${it.start}">${time}<div><h3>${esc(it.g)}</h3><span class="mute">Clase de reserva / repaso</span></div></div>`}
    const nm=it.kind==='ef'?'Edu. Física '+it.label:it.label;
-   return `<div class="card ev" style="${it.kind==='gu'||it.kind==='re'?'opacity:.75':''}">${time}<div><h3>${esc(nm)}</h3>${it.kind==='ef'?'<span class="mute small">1º ESO</span>':''}</div></div>`}).join('');
+   return `<div class="card ev" style="${it.kind==='gu'||it.kind==='re'?'opacity:.75':''}">${time}<div><h3>${esc(nm)}</h3>${it.kind==='tu'?'<div style="margin-top:4px"><b>Pendiente:</b> ver lo de las salidas laborales (ciclos formativos de grado medio)</div>':''}</div></div>`}).join('');
  return `<div class="top"><h1>Agenda</h1><div class="row"><button class="btn sm" data-a="wk" data-v="-7">‹ sem.</button><button class="btn sm" data-a="today">Hoy</button><button class="btn sm" data-a="wk" data-v="7">sem. ›</button></div></div>
  <div class="days">${days}</div><h2 style="margin-bottom:8px">${fmt(UI.date)}</h2>${body}`}
 function vSda(){
@@ -244,17 +244,32 @@ function sessionHTML(n,i,ctx){
  <div class="card"><b>Material.</b> ${esc(s.mat)}<br><b>Evaluación.</b> ${esc(s.ev)}</div>`}
 function vSheet(){
  const u=UI.sheet;
+ if(u.type==='rub'){const a=actsFor(u.g).find(x=>x.id===u.id);
+  let body;
+  if(!a.lv)body=`<div class="card">Esta actividad se puntúa de 0 a 10. Criterios: ${esc(a.desc)}</div>`;
+  else{const D=RUBD[a.lv.length];body=`<div class="card scroll"><table><tr><th>Indicador</th>${a.lv.map((l,i)=>`<th>${i+1} ${esc(l)}</th>`).join('')}</tr>${a.inds.map(ind=>`<tr><td><b>${esc(ind)}</b></td>${D.map(t=>`<td class="small">${esc(t.split(': ')[1])}</td>`).join('')}</tr>`).join('')}</table></div><div class="row"><button class="btn pri" data-a="copyrub" data-id="${a.id}" data-g="${esc(u.g)}">Copiar rúbrica</button></div><div id="cpy" class="small mute" style="margin-top:6px"></div>`}
+  return `<div class="sheet"><div><div class="bar row"><button class="btn" data-a="close">‹ Volver</button><span class="sp"></span><span class="mute">${esc(u.g)}</span></div><h2>Rúbrica: ${esc(a.name)}</h2><div class="small mute" style="margin:2px 0 8px">${esc(a.ses)} · ${esc(a.desc)}</div>${body}</div></div>`}
+
  if(u.type==='sda'){return `<div class="sheet"><div><div class="bar"><button class="btn" data-a="close">‹ Volver</button></div>${sessionHTML(u.n,u.i)}</div></div>`}
  const c=classInfo(u.g,u.d,u.s);const key=u.g+'|'+u.d+u.s;
  let h=`<div class="sheet"><div><div class="bar row"><button class="btn" data-a="close">‹ Volver</button><span class="sp"></span><span class="mute">${esc(u.g)} · ${fmt(u.d)} · ${u.s}</span></div>`;
  if(c&&c.sda)h+=sessionHTML(c.sda,c.s-1);
  else h+=`<h2>Clase de reserva / repaso</h2><div class="card mute">Las 12 sesiones de los dos SdA ya están cubiertas. Úsala para recuperar, repasar o terminar evaluaciones pendientes.</div>`;
+
+ {const R=S.roster[u.g]||[];const at=(S.att||{})[key]||{};
+ h+=`<div class="card"><h3>Comportamiento y actitud</h3>`;
+ if(!R.length)h+=`<div class="small mute" style="margin:4px 0 8px">Aún no hay alumnado en ${esc(u.g)}. Impórtalo en Ajustes → Alumnado.</div>`;
+ else{h+=`<div class="legend">${ATTLV.map((l,i)=>`<i style="background:var(--l${i+1});color:var(--l${i+1}f)">${i+1} ${esc(l)}</i>`).join('')}</div><div class="row" style="margin:6px 0"><button class="btn sm" data-a="attall" data-k="${esc(key)}" data-n="${R.length}">Todos «Bien» (3)</button><button class="btn sm" data-a="attclr" data-k="${esc(key)}">Borrar</button></div>`+R.map((n,si)=>`<div class="st"><div class="nm"><span>${esc(n)}</span><span class="mute small">${at[si]?ATTLV[at[si]-1]:'–'}</span></div><div class="btns">${ATTLV.map((l,i)=>`<button class="v${i+1} ${at[si]===i+1?'on':''}" data-a="att" data-k="${esc(key)}" data-s="${si}" data-v="${i+1}">${i+1}</button>`).join('')}</div></div>`).join('')}
+ h+=`<div class="small mute" style="margin-top:6px">Se guarda por clase. La nota de «Comportamiento y actitud» sale de la media de las clases de la unidad.</div></div>`}
  h+=`<div class="card"><label class="small mute">Notas de la clase</label><textarea data-a="note" data-k="${esc(key)}" placeholder="Qué ha pasado, qué repetir…">${esc(S.notes[key]||'')}</textarea>
  <div class="row" style="margin-top:8px"><button class="btn ${S.done[key]?'pri':''}" data-a="done" data-k="${esc(key)}">${S.done[key]?'✓ Hecha':'Marcar como hecha'}</button>
  <button class="btn" data-a="skip" data-g="${esc(u.g)}" data-k="${u.d}@${u.s}">No se imparte (desplazar)</button>
  <button class="btn" data-a="goeval" data-g="${esc(u.g)}">Evaluar grupo</button></div>
  <div class="small mute" style="margin-top:6px">«No se imparte» quita esta clase y adelanta el resto de sesiones del grupo.</div></div></div></div>`;
  return h}
+const ATTLV=['Mejorable','Suficiente','Bien','Excelente'];
+function attAvg(g,sda,si){let t=0,n=0;classes(g).forEach(c=>{if(c.sda!==sda)return;const v=((S.att||{})[g+'|'+c.date+c.start]||{})[si];if(v){t+=v;n++}});return n?t/n:null}
+const RUBD={3:['En proceso: lo intenta pero necesita ayuda y revisión.','Logrado: cumple lo pedido de forma autónoma.','Destacado: cumple con calidad y aporta ideas o ayuda al grupo.'],4:['Mejorable: no lo consigue o necesita ayuda constante.','Suficiente: lo consigue a veces o con ayuda.','Bien: lo consigue casi siempre de forma autónoma.','Excelente: lo consigue siempre y ayuda a los demás.']};
 function actsFor(g){const ns=g[0]==='1'?[3]:[1,2];return ns.flatMap(n=>SDA[n].acts.map(a=>({...a,sda:n})))}
 function vEval(){
  const g=UI.evG;const sdaN=(classes(g).filter(c=>c.date<=todayIso).slice(-1)[0]||{}).sda||1;
@@ -264,7 +279,7 @@ function vEval(){
  let h=`<div class="top"><h1>Evaluar</h1></div>
  <div class="chips">${GROUPS.map(x=>`<button class="chip ${x===g?'on':''}" data-a="evg" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
  <select data-a="eva">${acts.map(x=>`<option value="${x.id}" ${x.id===a.id?'selected':''}>SdA ${x.sda} · ${esc(x.name)}</option>`).join('')}</select>
- <div class="small mute" style="margin:6px 0 8px">${esc(a.desc)} (${esc(a.ses)})</div>`;
+ <div class="small mute" style="margin:6px 0 8px">${esc(a.desc)} (${esc(a.ses)}) <button class="btn sm" data-a="rub" data-id="${a.id}" data-g="${esc(g)}">Rúbrica</button>${a.id.startsWith('act')?'<div style="margin-top:4px">La nota sale de la media de «Comportamiento y actitud» de cada clase. Si pulsas aquí un nivel, se usa el tuyo.</div>':''}</div>`;
  if(!R.length)return h+`<div class="card"><b>Aún no hay alumnado en ${esc(g)}.</b><div class="small mute" style="margin:4px 0 8px">Pega la lista (una línea por alumno). Mejor solo nombre de pila o iniciales.</div><textarea id="rost" placeholder="Ana&#10;Luis&#10;…"></textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(g)}">Guardar lista</button></div>`;
  const iN=a.inds.length;if(UI.evI>iN)UI.evI=0;
  h+=`<div class="chips">${a.inds.map((x,i)=>`<button class="chip ${UI.evI===i?'on':''}" data-a="evi" data-v="${i}">${esc(x)}</button>`).join('')}<button class="chip ${UI.evI===iN?'on':''}" data-a="evi" data-v="${iN}">Resumen</button></div>`;
@@ -284,7 +299,9 @@ function vEval(){
  }
  return h}
 function grade(g,a,si){
- const sc=S.scores[g+'|'+a.id+'|'+si];if(!sc)return null;
+ const sc=S.scores[g+'|'+a.id+'|'+si];
+ if(a.id.startsWith('act')&&a.sda&&!(sc&&a.inds.some((x,i)=>sc[i]!=null))){const m=attAvg(g,a.sda,si);return m==null?null:Math.round(m/4*100)/10}
+ if(!sc)return null;
  if(!a.lv){if(sc[0]==null)return null;return Math.min(10,sc[0]+(sc.h?0.5:0))}
  const vals=a.inds.map((x,i)=>sc[i]).filter(v=>v!=null);if(!vals.length)return null;
  return Math.round(vals.reduce((p,q)=>p+q,0)/vals.length/a.max*100)/10}
@@ -293,6 +310,7 @@ function vAj(){
  <div class="card"><h3>Calendario del iPhone</h3><div class="small mute" style="margin:4px 0 8px">Genera un archivo .ics con tu horario (2 nov – 22 dic), con la sesión de SdA de cada clase. Al abrirlo desde Archivos en el iPhone se añade a Calendario.</div><button class="btn pri" data-a="ics">Descargar calendario (.ics)</button><div id="icsmsg" class="small mute" style="margin-top:6px"></div></div>
  <div class="card"><h3>Alumnado</h3><div class="small mute" style="margin:4px 0 8px">Solo nombre de pila o iniciales. Un grupo por pestaña de «Evaluar».</div>
  ${GROUPS.map(g=>`<div class="row" style="margin:4px 0"><b>${esc(g)}</b><span class="mute small">${(S.roster[g]||[]).length} alumnos</span><span class="sp"></span><button class="btn sm" data-a="editroster" data-g="${esc(g)}">Editar</button></div>`).join('')}
+ <textarea id="imp" style="margin-top:8px" placeholder="Pega aquí todas las listas:&#10;## 1ºC&#10;Ana L.&#10;Luis P.&#10;## 1ºD …"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
  <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan).</div></div>`}
@@ -324,6 +342,16 @@ document.addEventListener('click',async e=>{
  else if(a==='done'){S.done[D.k]=!S.done[D.k];save()}
  else if(a==='skip'){(S.skipped[D.g]=S.skipped[D.g]||[]).push(D.k);Object.keys(_cache).forEach(k=>delete _cache[k]);UI.sheet=null;save()}
  else if(a==='unskip'){S.skipped[D.g]=(S.skipped[D.g]||[]).filter(x=>x!==D.k);Object.keys(_cache).forEach(k=>delete _cache[k]);save()}
+ else if(a==='att'){S.att=S.att||{};const k=S.att[D.k]=S.att[D.k]||{};if(k[D.s]===+D.v)delete k[D.s];else k[D.s]=+D.v;save()}
+ else if(a==='attall'){S.att=S.att||{};const k={};for(let i=0;i<+D.n;i++)k[i]=3;S.att[D.k]=k;save()}
+ else if(a==='attclr'){S.att=S.att||{};delete S.att[D.k];save()}
+ else if(a==='rub')UI.sheet={type:'rub',id:D.id,g:D.g};
+ else if(a==='copyrub'){const ac=actsFor(D.g).find(x=>x.id===D.id);const Dd=RUBD[ac.lv.length];
+   const txt=ac.name+' ('+ac.ses+')\n'+ac.inds.map(ind=>ind+'\n'+Dd.map((t,i)=>'  '+(i+1)+' '+t).join('\n')).join('\n\n');
+   let ok=false;try{await navigator.clipboard.writeText(txt);ok=true}catch(err){}
+   document.getElementById('cpy').innerHTML=ok?'Copiado.':'No se pudo copiar. Selecciona el texto:<textarea readonly>'+esc(txt)+'</textarea>';return}
+ else if(a==='importroster'){const t=document.getElementById('imp').value;let g=null,n=0;const R={};t.split('\n').forEach(l=>{l=l.trim();if(!l)return;if(l.startsWith('##')){g=l.replace(/^#+/,'').trim();R[g]=[];return}if(g)R[g].push(l)});
+   Object.keys(R).forEach(k=>{if(GROUPS.includes(k)&&R[k].length){S.roster[k]=R[k];n++}});save();render();document.getElementById('impmsg').textContent=n?('Importadas '+n+' listas.'):'No se ha reconocido ningún grupo. Cada lista debe empezar por una línea como «## 1ºC».';return}
  else if(a==='goeval'){UI.evG=D.g;UI.tab='eval';UI.sheet=null}
  else if(a==='evg'){UI.evG=D.v;UI.evI=0}
  else if(a==='evi')UI.evI=+D.v;
