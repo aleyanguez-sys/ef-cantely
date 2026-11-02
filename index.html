@@ -46,6 +46,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 textarea,select,input{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 10px;width:100%}
 textarea{min-height:90px}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.chip.sm{padding:2px 8px;font-size:12px;display:inline-block}
 .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;font-weight:600;font-size:14px}
 .chip.on{background:var(--fg);color:var(--bg);border-color:transparent}
 .st{padding:10px 0;border-top:1px solid var(--line)}
@@ -240,9 +241,9 @@ function vSheet(){
  const u=UI.sheet;
  if(u.type==='rub'){const a=actsFor(u.g).find(x=>x.id===u.id);
   let body;
-  if(!a.lv)body=`<div class="card">Esta actividad se puntúa de 0 a 10. Criterios: ${esc(a.desc)}</div>`;
-  else{const D=RUBD[a.lv.length];body=`<div class="card scroll"><table><tr><th>Indicador</th>${a.lv.map((l,i)=>`<th>${i+1} ${esc(l)}</th>`).join('')}</tr>${a.inds.map(ind=>`<tr><td><b>${esc(ind)}</b></td>${D.map(t=>`<td class="small">${esc(t.split(': ')[1])}</td>`).join('')}</tr>`).join('')}</table></div><div class="row"><button class="btn pri" data-a="copyrub" data-id="${a.id}" data-g="${esc(u.g)}">Copiar rúbrica</button></div><div id="cpy" class="small mute" style="margin-top:6px"></div>`}
-  return `<div class="sheet"><div><div class="bar row"><button class="btn" data-a="close">‹ Volver</button><span class="sp"></span><span class="mute">${esc(u.g)}</span></div><h2>Rúbrica: ${esc(a.name)}</h2><div class="small mute" style="margin:2px 0 8px">${esc(a.ses)} · ${esc(a.desc)}</div>${body}</div></div>`}
+  if(!a.lv)body=`<div class="card">Esta actividad se puntúa de 0 a 10. Criterios: ${esc(a.desc)}</div><div class="card"><b>Criterios de evaluación</b>${cdesc(a.c)}</div>`;
+  else{const D=RUBD[a.lv.length];body=`<div class="card scroll"><table><tr><th>Indicador</th><th>Criterio</th>${a.lv.map((l,i)=>`<th>${i+1} ${esc(l)}</th>`).join('')}</tr>${a.inds.map(ind=>`<tr><td><b>${esc(ind)}</b></td><td>${cl((a.ic||[])[a.inds.indexOf(ind)])}</td>${D.map(t=>`<td class="small">${esc(t.split(': ')[1])}</td>`).join('')}</tr>`).join('')}</table></div><div class="card"><b>Criterios de evaluación</b>${cdesc(a.c)}<div class="small mute" style="margin-top:4px">Resumen orientativo de los criterios del currículo de EF de Andalucía (LOMLOE). Contrástalo con la programación del departamento.</div></div><div class="row"><button class="btn pri" data-a="copyrub" data-id="${a.id}" data-g="${esc(u.g)}">Copiar rúbrica</button></div><div id="cpy" class="small mute" style="margin-top:6px"></div>`}
+  return `<div class="sheet"><div><div class="bar row"><button class="btn" data-a="close">‹ Volver</button><span class="sp"></span><span class="mute">${esc(u.g)}</span></div><h2>Rúbrica: ${esc(a.name)}</h2><div class="small mute" style="margin:2px 0 8px">${esc(a.ses)} · ${esc(a.desc)}</div><div style="margin-bottom:8px">${cl(a.c)}</div>${body}</div></div>`}
 
  if(u.type==='sda'){return `<div class="sheet"><div><div class="bar"><button class="btn" data-a="close">‹ Volver</button></div>${sessionHTML(u.n,u.i)}</div></div>`}
  const c=classInfo(u.g,u.d,u.s);const key=u.g+'|'+u.d+u.s;
@@ -265,7 +266,30 @@ const BASEURL='https://aleyanguez-sys.github.io/ef-cantely/';
 const ATTLV=['Mejorable','Suficiente','Bien','Excelente'];
 function attAvg(g,sda,si){let t=0,n=0;classes(g).forEach(c=>{if(c.sda!==sda)return;const v=((S.att||{})[g+'|'+c.date+c.start]||{})[si];if(v){t+=v;n++}});return n?t/n:null}
 const RUBD={3:['En proceso: lo intenta pero necesita ayuda y revisión.','Logrado: cumple lo pedido de forma autónoma.','Destacado: cumple con calidad y aporta ideas o ayuda al grupo.'],4:['Mejorable: no lo consigue o necesita ayuda constante.','Suficiente: lo consigue a veces o con ayuda.','Bien: lo consigue casi siempre de forma autónoma.','Excelente: lo consigue siempre y ayuda a los demás.']};
-function actsFor(g){const ns=g[0]==='1'?[3]:[1,2];return ns.flatMap(n=>SDA[n].acts.map(a=>({...a,sda:n})))}
+const CT={
+'EFI.4.1.1':'Planificar y autorregular la actividad física para la salud, con herramientas digitales.',
+'EFI.4.1.2':'Activación, dosificación del esfuerzo, postura, respiración e higiene.',
+'EFI.4.1.3':'Prevención de lesiones y medidas de seguridad.',
+'EFI.4.2.1':'Proyectos motores individuales y cooperativos, con autoevaluación y coevaluación.',
+'EFI.4.2.2':'Adaptarse a situaciones de incertidumbre y dificultad variable (decisión y ejecución).',
+'EFI.4.3.1':'Organizar actividades, ética deportiva y deportividad; respeto a las reglas.',
+'EFI.4.3.2':'Cooperar, repartir roles y gestionar el tiempo en equipo.',
+'EFI.1.1.2':'Practicar con dosificación del esfuerzo, higiene y hábitos saludables.',
+'EFI.1.2.2':'Adaptarse a situaciones cambiantes de juego (percepción y decisión).',
+'EFI.1.2.3':'Control corporal y resolución de problemas motores.',
+'EFI.1.3.1':'Convivir sin discriminación, respetando reglas y deportividad.',
+'EFI.1.3.2':'Cooperar y asumir roles en el grupo.'};
+const CRM={
+ficha:{c:['EFI.4.1.1','EFI.4.1.3','EFI.4.2.1','EFI.4.3.2'],ic:[['EFI.4.1.3'],['EFI.4.2.1'],['EFI.4.1.1'],['EFI.4.3.2']]},
+act1:{c:['EFI.4.1.2','EFI.4.3.1','EFI.4.3.2'],ic:[['EFI.4.1.2'],['EFI.4.3.1'],['EFI.4.1.2']]},
+exam:{c:['EFI.4.1.1','EFI.4.1.2','EFI.4.1.3'],ic:[['EFI.4.1.1','EFI.4.1.2','EFI.4.1.3']]},
+des:{c:['EFI.4.2.2','EFI.4.3.1','EFI.4.3.2'],ic:[['EFI.4.2.2'],['EFI.4.3.2'],['EFI.4.3.1']]},
+act2:{c:['EFI.4.1.2','EFI.4.3.1','EFI.4.3.2'],ic:[['EFI.4.1.2'],['EFI.4.3.1'],['EFI.4.1.2']]},
+des3:{c:['EFI.1.2.2','EFI.1.2.3','EFI.1.3.1','EFI.1.3.2'],ic:[['EFI.1.2.3'],['EFI.1.2.2','EFI.1.3.2'],['EFI.1.3.1']]},
+act3:{c:['EFI.1.1.2','EFI.1.3.1','EFI.1.3.2'],ic:[['EFI.1.1.2'],['EFI.1.3.1'],['EFI.1.1.2']]}};
+const cl=cs=>(cs||[]).map(c=>`<span class="chip sm" title="${esc(CT[c]||'')}">${c.replace('EFI.','')}</span>`).join(' ');
+const cdesc=cs=>(cs||[]).map(c=>`<div class="small"><b>${c}</b> ${esc(CT[c]||'')}</div>`).join('');
+function actsFor(g){const ns=g[0]==='1'?[3]:[1,2];return ns.flatMap(n=>SDA[n].acts.map(a=>({...a,sda:n,...(CRM[a.id]||{})})))}
 function vEval(){
  const g=UI.evG;const sdaN=(classes(g).filter(c=>c.date<=todayIso).slice(-1)[0]||{}).sda||1;
  const acts=actsFor(g);
@@ -274,10 +298,10 @@ function vEval(){
  let h=`<div class="top"><h1>Evaluar</h1></div>
  <div class="chips">${GROUPS.map(x=>`<button class="chip ${x===g?'on':''}" data-a="evg" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
  <select data-a="eva">${acts.map(x=>`<option value="${x.id}" ${x.id===a.id?'selected':''}>SdA ${x.sda} · ${esc(x.name)}</option>`).join('')}</select>
- <div class="small mute" style="margin:6px 0 8px">${esc(a.desc)} (${esc(a.ses)}) <button class="btn sm" data-a="rub" data-id="${a.id}" data-g="${esc(g)}">Rúbrica</button>${a.id.startsWith('act')?'<div style="margin-top:4px">La nota sale de la media de «Comportamiento y actitud» de cada clase. Si pulsas aquí un nivel, se usa el tuyo.</div>':''}</div>`;
+ <div class="small mute" style="margin:6px 0 8px">${esc(a.desc)} (${esc(a.ses)}) <button class="btn sm" data-a="rub" data-id="${a.id}" data-g="${esc(g)}">Rúbrica</button><div style="margin-top:4px">Criterios: ${cl(a.c)}</div>${a.id.startsWith('act')?'<div style="margin-top:4px">La nota sale de la media de «Comportamiento y actitud» de cada clase. Si pulsas aquí un nivel, se usa el tuyo.</div>':''}</div>`;
  if(!R.length)return h+`<div class="card"><b>Aún no hay alumnado en ${esc(g)}.</b><div class="small mute" style="margin:4px 0 8px">Pega la lista (una línea por alumno). Mejor solo nombre de pila o iniciales.</div><textarea id="rost" placeholder="Ana&#10;Luis&#10;…"></textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(g)}">Guardar lista</button></div>`;
  const iN=a.inds.length;if(UI.evI>iN)UI.evI=0;
- h+=`<div class="chips">${a.inds.map((x,i)=>`<button class="chip ${UI.evI===i?'on':''}" data-a="evi" data-v="${i}">${esc(x)}</button>`).join('')}<button class="chip ${UI.evI===iN?'on':''}" data-a="evi" data-v="${iN}">Resumen</button></div>`;
+ h+=`<div class="chips">${a.inds.map((x,i)=>`<button class="chip ${UI.evI===i?'on':''}" data-a="evi" data-v="${i}">${esc(x)}</button>`).join('')}<button class="chip ${UI.evI===iN?'on':''}" data-a="evi" data-v="${iN}">Resumen</button></div>${UI.evI<iN&&a.ic?`<div class="small mute" style="margin:4px 0">Criterio de este indicador: ${cl(a.ic[UI.evI])} ${esc((a.ic[UI.evI]||[]).map(c=>CT[c]).join(' '))}</div>`:''}`;
  if(UI.evI<iN){
   if(a.lv)h+=`<div class="legend">${a.lv.map((l,i)=>`<i style="background:var(--l${i+1});color:var(--l${i+1}f)">${i+1} ${esc(l)}</i>`).join('')}</div>`;
   h+=`<div class="card">`+R.map((n,si)=>{
@@ -308,7 +332,7 @@ function vAj(){
  <textarea id="imp" style="margin-top:8px" placeholder="Pega aquí todas las listas:&#10;## 1ºC&#10;Ana L.&#10;Luis P.&#10;## 1ºD …"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · i</div></div>`}
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · j</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
@@ -342,7 +366,7 @@ document.addEventListener('click',async e=>{
  else if(a==='attclr'){S.att=S.att||{};delete S.att[D.k];save()}
  else if(a==='rub')UI.sheet={type:'rub',id:D.id,g:D.g};
  else if(a==='copyrub'){const ac=actsFor(D.g).find(x=>x.id===D.id);const Dd=RUBD[ac.lv.length];
-   const txt=ac.name+' ('+ac.ses+')\n'+ac.inds.map(ind=>ind+'\n'+Dd.map((t,i)=>'  '+(i+1)+' '+t).join('\n')).join('\n\n');
+   const txt=ac.name+' ('+ac.ses+')\nCriterios: '+(ac.c||[]).join(', ')+'\n\n'+ac.inds.map((ind,ii)=>ind+' ['+((ac.ic||[])[ii]||[]).join(', ')+']\n'+Dd.map((t,i)=>'  '+(i+1)+' '+t).join('\n')).join('\n\n');
    let ok=false;try{await navigator.clipboard.writeText(txt);ok=true}catch(err){}
    document.getElementById('cpy').innerHTML=ok?'Copiado.':'No se pudo copiar. Selecciona el texto:<textarea readonly>'+esc(txt)+'</textarea>';return}
  else if(a==='importroster'){const t=document.getElementById('imp').value;let g=null,n=0;const R={};t.split('\n').forEach(l=>{l=l.trim();if(!l)return;if(l.startsWith('##')){g=l.replace(/^#+/,'').trim();R[g]=[];return}if(g)R[g].push(l)});
