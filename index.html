@@ -46,6 +46,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 textarea,select,input{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 10px;width:100%}
 textarea{min-height:90px}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.cell{min-width:34px;min-height:34px;border:1px solid var(--line);background:var(--panel);border-radius:8px;font-weight:700;font-size:15px;color:inherit}
 .chip.sm{padding:2px 8px;font-size:12px;display:inline-block}
 .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;font-weight:600;font-size:14px}
 .chip.on{background:var(--fg);color:var(--bg);border-color:transparent}
@@ -315,8 +316,10 @@ function vEval(){
     const show=v==null?'–':(a.lv?a.lv[v-1]:(v+(sc.h?0.5:0)));
     return `<div class="st"><div class="nm"><span>${esc(n)}</span><span class="mute small">${esc(show)}</span></div>${btns}</div>`}).join('')+`</div>`;
  }else{
-  h+=`<div class="card scroll"><table><tr><th>Alumno/a</th>${a.lv?a.inds.map(x=>`<th>${esc(x.slice(0,4))}</th>`).join(''):''}<th>Nota</th></tr>`+R.map((n,si)=>{
-    const nt=grade(g,a,si);return `<tr><td>${esc(n)}</td>${a.lv?a.inds.map((x,i)=>`<td>${(S.scores[g+'|'+a.id+'|'+si]||{})[i]||'–'}</td>`).join(''):''}<td class="nota">${nt==null?'–':nt}</td></tr>`}).join('')+`</table></div>
+  const FL=UI.fillLv||3;
+  if(a.lv)h+=`<div class="card"><div class="small mute" style="margin-bottom:6px">Nivel para rellenar rápido:</div><div class="btns">${a.lv.map((l,i)=>`<button class="v${i+1} ${FL===i+1?'on':''}" data-a="fl" data-v="${i+1}">${i+1}</button>`).join('')}</div><div class="small mute" style="margin:4px 0">${esc(a.lv[FL-1])}</div><div class="row"><button class="btn pri sm" data-a="fillall">Poner ${FL} a todos (los vacíos)</button></div><div class="small mute" style="margin-top:4px">Después toca una casilla para cambiarla (1→2→…→vacío). Toca el nombre de una columna para poner ${FL} a toda la columna.</div></div>`;
+  h+=`<div class="card scroll"><table><tr><th>Alumno/a</th>${a.lv?a.inds.map((x,i)=>`<th><button class="btn sm" data-a="fillcol" data-i="${i}">${esc(x.slice(0,4))}</button></th>`).join(''):''}<th>Nota</th></tr>`+R.map((n,si)=>{
+    const nt=grade(g,a,si);const sc=S.scores[g+'|'+a.id+'|'+si]||{};return `<tr><td>${esc(n)}</td>${a.lv?a.inds.map((x,i)=>{const v=sc[i];return `<td>${v?`<button class="cell" style="background:var(--l${v});color:var(--l${v}f)" data-a="cyc" data-s="${si}" data-i="${i}">${v}</button>`:`<button class="cell" data-a="cyc" data-s="${si}" data-i="${i}">–</button>`}</td>`}).join(''):''}<td class="nota">${nt==null?'–':nt}</td></tr>`}).join('')+`</table></div>
   <div class="row"><button class="btn pri" data-a="copynotas">Copiar notas (para Séneca)</button><button class="btn" data-a="clearscores" data-g="${esc(g)}" data-id="${a.id}">Borrar esta evaluación</button></div><div id="cpy" class="small mute" style="margin-top:6px"></div>`;
  }
  return h}
@@ -335,7 +338,7 @@ function vAj(){
  <textarea id="imp" style="margin-top:8px" placeholder="Pega aquí todas las listas:&#10;## 1ºC&#10;Ana L.&#10;Luis P.&#10;## 1ºD …"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · k</div></div>`}
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · l</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
@@ -378,6 +381,10 @@ document.addEventListener('click',async e=>{
  else if(a==='evg'){UI.evG=D.v;UI.evI=0}
  else if(a==='evi')UI.evI=+D.v;
  else if(a==='sc'){const key=UI.evG+'|'+UI.evA+'|'+D.s;const sc=S.scores[key]=S.scores[key]||{};if(sc[UI.evI]===+D.v)delete sc[UI.evI];else sc[UI.evI]=+D.v;save()}
+ else if(a==='fl'){UI.fillLv=+D.v}
+ else if(a==='fillall'){const ac=actsFor(UI.evG).find(x=>x.id===UI.evA);const L=UI.fillLv||3;(S.roster[UI.evG]||[]).forEach((n,si)=>{const key=UI.evG+'|'+ac.id+'|'+si;const sc=S.scores[key]=S.scores[key]||{};ac.inds.forEach((x,i)=>{if(!sc[i])sc[i]=L})});save()}
+ else if(a==='fillcol'){const ac=actsFor(UI.evG).find(x=>x.id===UI.evA);const L=UI.fillLv||3;(S.roster[UI.evG]||[]).forEach((n,si)=>{const key=UI.evG+'|'+ac.id+'|'+si;const sc=S.scores[key]=S.scores[key]||{};sc[+D.i]=L});save()}
+ else if(a==='cyc'){const ac=actsFor(UI.evG).find(x=>x.id===UI.evA);const key=UI.evG+'|'+ac.id+'|'+D.s;const sc=S.scores[key]=S.scores[key]||{};const c=sc[+D.i]||0;if(c>=ac.lv.length)delete sc[+D.i];else sc[+D.i]=c+1;save()}
  else if(a==='half'){const key=UI.evG+'|'+UI.evA+'|'+D.s;const sc=S.scores[key]=S.scores[key]||{};sc.h=!sc.h;save()}
  else if(a==='saveroster'){const t=document.getElementById('rost').value.split('\n').map(x=>x.trim()).filter(Boolean);S.roster[D.g]=t;UI.editG=null;save()}
  else if(a==='editroster')UI.editG=D.g;
