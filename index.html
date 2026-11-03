@@ -47,6 +47,7 @@ textarea,select,input{font:inherit;color:var(--fg);background:var(--panel);borde
 textarea{min-height:90px}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
 .cell{min-width:34px;min-height:34px;border:1px solid var(--line);background:var(--panel);border-radius:8px;font-weight:700;font-size:15px;color:inherit}
+.exr{display:flex;gap:14px;margin-top:6px}.exg{display:inline-flex;gap:4px}.cell.ex{padding:4px 12px;font-size:16px}.cell.exm{min-width:30px;color:var(--mute,inherit)}
 .chip.sm{padding:2px 8px;font-size:12px;display:inline-block}
 .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;font-weight:600;font-size:14px}
 .chip.on{background:var(--fg);color:var(--bg);border-color:transparent}
@@ -256,7 +257,7 @@ function vSheet(){
  {const R=S.roster[u.g]||[];const at=(S.att||{})[key]||{};
  h+=`<div class="card"><h3>Comportamiento y actitud</h3>`;
  if(!R.length)h+=`<div class="small mute" style="margin:4px 0 8px">Aún no hay alumnado cargado. Pega aquí el texto de todas las listas (el archivo alumnado_cuaderno.txt) y pulsa Importar. Solo se hace una vez.</div><textarea id="imp" placeholder="## 1ºC&#10;Ana L.&#10;…"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>`;
- else{h+=`<div class="legend">${ATTLV.map((l,i)=>`<i style="background:var(--l${i+1});color:var(--l${i+1}f)">${i+1} ${esc(l)}</i>`).join('')}</div><div class="row" style="margin:6px 0"><button class="btn sm" data-a="attall" data-k="${esc(key)}" data-n="${R.length}">Todos «Bien» (3)</button><button class="btn sm" data-a="attclr" data-k="${esc(key)}">Borrar</button></div>`+R.map((n,si)=>`<div class="st"><div class="nm"><span>${esc(n)}</span><span class="mute small">${at[si]?ATTLV[at[si]-1]:'–'}</span></div><div class="btns">${ATTLV.map((l,i)=>`<button class="v${i+1} ${at[si]===i+1?'on':''}" data-a="att" data-k="${esc(key)}" data-s="${si}" data-v="${i+1}">${i+1}</button>`).join('')}</div></div>`).join('')}
+ else{h+=`<div class="legend">${ATTLV.map((l,i)=>`<i style="background:var(--l${i+1});color:var(--l${i+1}f)">${i+1} ${esc(l)}</i>`).join('')}</div><div class="row" style="margin:6px 0"><button class="btn sm" data-a="attall" data-k="${esc(key)}" data-n="${R.length}">Todos «Bien» (3)</button><button class="btn sm" data-a="attclr" data-k="${esc(key)}">Borrar</button></div>`+R.map((n,si)=>`<div class="st"><div class="nm"><span>${esc(n)}</span><span class="mute small">${at[si]?ATTLV[at[si]-1]:'–'}</span></div><div class="btns">${ATTLV.map((l,i)=>`<button class="v${i+1} ${at[si]===i+1?'on':''}" data-a="att" data-k="${esc(key)}" data-s="${si}" data-v="${i+1}">${i+1}</button>`).join('')}</div>${exRow(key,si)}</div>`).join('')}
  h+=`<div class="small mute" style="margin-top:6px">Se guarda por clase. La nota de «Comportamiento y actitud» sale de la media de las clases de la unidad.</div></div>`}
  h+=`<div class="card"><label class="small mute">Notas de la clase</label><textarea data-a="note" data-k="${esc(key)}" placeholder="Qué ha pasado, qué repetir…">${esc(S.notes[key]||'')}</textarea>
  <div class="row" style="margin-top:8px"><button class="btn ${S.done[key]?'pri':''}" data-a="done" data-k="${esc(key)}">${S.done[key]?'✓ Hecha':'Marcar como hecha'}</button>
@@ -266,6 +267,10 @@ function vSheet(){
  return h}
 const BASEURL='https://aleyanguez-sys.github.io/ef-cantely/';
 const ATTLV=['Mejorable','Suficiente','Bien','Excelente'];
+function exGet(key,si){const e=((S.ex||{})[key]||{})[si]||{};return {p:e.p||0,n:e.n||0}}
+function exRow(key,si){const e=exGet(key,si);const b=(t,c,l)=>`<span class="exg"><button class="cell ex ${t}" data-a="exadd" data-k="${esc(key)}" data-s="${si}" data-t="${t}">${l} ${c||''}</button>${c?`<button class="cell exm" data-a="exsub" data-k="${esc(key)}" data-s="${si}" data-t="${t}">−</button>`:''}</span>`;
+ return `<div class="exr">${b('p',e.p,'⭐')}${b('n',e.n,'😞')}</div>`}
+function exTot(g,sda,si){let p=0,n=0;classes(g).forEach(c=>{if(sda&&c.sda!==sda)return;const e=exGet(g+'|'+c.date+c.start,si);p+=e.p;n+=e.n});return {p,n}}
 function attAvg(g,sda,si){let t=0,n=0;classes(g).forEach(c=>{if(c.sda!==sda)return;const v=((S.att||{})[g+'|'+c.date+c.start]||{})[si];if(v){t+=v;n++}});return n?t/n:null}
 const RUBD={3:['En proceso: lo intenta pero necesita ayuda y revisión.','Logrado: cumple lo pedido de forma autónoma.','Destacado: cumple con calidad y aporta ideas o ayuda al grupo.'],4:['Mejorable: no lo consigue o necesita ayuda constante.','Suficiente: lo consigue a veces o con ayuda.','Bien: lo consigue casi siempre de forma autónoma.','Excelente: lo consigue siempre y ayuda a los demás.']};
 const CT={
@@ -319,8 +324,8 @@ function vEval(){
  }else{
   const FL=UI.fillLv||3;
   if(a.lv)h+=`<div class="card"><div class="small mute" style="margin-bottom:6px">Nivel para rellenar rápido:</div><div class="btns">${a.lv.map((l,i)=>`<button class="v${i+1} ${FL===i+1?'on':''}" data-a="fl" data-v="${i+1}">${i+1}</button>`).join('')}</div><div class="small mute" style="margin:4px 0">${esc(a.lv[FL-1])}</div><div class="row"><button class="btn pri sm" data-a="fillall">Poner ${FL} a todos (los vacíos)</button></div><div class="small mute" style="margin-top:4px">Después toca una casilla para cambiarla (1→2→…→vacío). Toca el nombre de una columna para poner ${FL} a toda la columna.</div></div>`;
-  h+=`<div class="card scroll"><table><tr><th>Alumno/a</th>${a.lv?a.inds.map((x,i)=>`<th><button class="btn sm" data-a="fillcol" data-i="${i}">${esc(x.slice(0,4))}</button></th>`).join(''):''}<th>Nota</th></tr>`+R.map((n,si)=>{
-    const nt=grade(g,a,si);const sc=S.scores[g+'|'+a.id+'|'+si]||{};return `<tr><td>${esc(n)}</td>${a.lv?a.inds.map((x,i)=>{const v=sc[i];return `<td>${v?`<button class="cell" style="background:var(--l${v});color:var(--l${v}f)" data-a="cyc" data-s="${si}" data-i="${i}">${v}</button>`:`<button class="cell" data-a="cyc" data-s="${si}" data-i="${i}">–</button>`}</td>`}).join(''):''}<td class="nota">${nt==null?'–':nt}</td></tr>`}).join('')+`</table></div>
+  h+=`<div class="card scroll"><table><tr><th>Alumno/a</th>${a.lv?a.inds.map((x,i)=>`<th><button class="btn sm" data-a="fillcol" data-i="${i}">${esc(x.slice(0,4))}</button></th>`).join(''):''}<th>Nota</th>${a.id.startsWith('act')?'<th>⭐</th><th>😞</th>':''}</tr>`+R.map((n,si)=>{
+    const nt=grade(g,a,si);const xt=a.id.startsWith('act')?exTot(g,a.sda,si):null;const sc=S.scores[g+'|'+a.id+'|'+si]||{};return `<tr><td>${esc(n)}</td>${a.lv?a.inds.map((x,i)=>{const v=sc[i];return `<td>${v?`<button class="cell" style="background:var(--l${v});color:var(--l${v}f)" data-a="cyc" data-s="${si}" data-i="${i}">${v}</button>`:`<button class="cell" data-a="cyc" data-s="${si}" data-i="${i}">–</button>`}</td>`}).join(''):''}<td class="nota">${nt==null?'–':nt}</td>${xt?`<td>${xt.p||'–'}</td><td>${xt.n||'–'}</td>`:''}</tr>`}).join('')+`</table></div>
   <div class="row"><button class="btn pri" data-a="copynotas">Copiar notas (para Séneca)</button><button class="btn" data-a="clearscores" data-g="${esc(g)}" data-id="${a.id}">Borrar esta evaluación</button></div><div id="cpy" class="small mute" style="margin-top:6px"></div>`;
  }
  return h}
@@ -339,7 +344,7 @@ function vAj(){
  <textarea id="imp" style="margin-top:8px" placeholder="Pega aquí todas las listas:&#10;## 1ºC&#10;Ana L.&#10;Luis P.&#10;## 1ºD …"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 2 nov 2026 · m</div></div>`}
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 3 nov 2026 · n</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
@@ -433,6 +438,7 @@ document.addEventListener('click',async e=>{
  else if(a==='unskip'){S.skipped[D.g]=(S.skipped[D.g]||[]).filter(x=>x!==D.k);Object.keys(_cache).forEach(k=>delete _cache[k]);save()}
  else if(a==='att'){S.att=S.att||{};const k=S.att[D.k]=S.att[D.k]||{};if(k[D.s]===+D.v)delete k[D.s];else k[D.s]=+D.v;save()}
  else if(a==='attall'){S.att=S.att||{};const k={};for(let i=0;i<+D.n;i++)k[i]=3;S.att[D.k]=k;save()}
+ else if(a==='exadd'||a==='exsub'){S.ex=S.ex||{};const k=S.ex[D.k]=S.ex[D.k]||{};const e=k[D.s]=k[D.s]||{p:0,n:0};e[D.t]=Math.max(0,(e[D.t]||0)+(a==='exadd'?1:-1));save()}
  else if(a==='attclr'){S.att=S.att||{};delete S.att[D.k];save()}
  else if(a==='rub')UI.sheet={type:'rub',id:D.id,g:D.g};
  else if(a==='copyrub'){const ac=actsFor(D.g).find(x=>x.id===D.id);const Dd=RUBD[ac.lv.length];
