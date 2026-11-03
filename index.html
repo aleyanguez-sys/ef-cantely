@@ -48,6 +48,7 @@ textarea{min-height:90px}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
 .cell{min-width:34px;min-height:34px;border:1px solid var(--line);background:var(--panel);border-radius:8px;font-weight:700;font-size:15px;color:inherit}
 .exr{display:flex;gap:14px;margin-top:6px}.exg{display:inline-flex;gap:4px}.cell.ex{padding:4px 12px;font-size:16px}.cell.exm{min-width:30px;color:var(--mute,inherit)}
+.excb{width:34px;height:34px;border:2px solid var(--line);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:800}.excb.on{background:var(--l3,#7bb27b);color:var(--l3f,#fff);border-color:transparent}
 .chip.sm{padding:2px 8px;font-size:12px;display:inline-block}
 .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;font-weight:600;font-size:14px}
 .chip.on{background:var(--fg);color:var(--bg);border-color:transparent}
@@ -240,8 +241,24 @@ function sessionHTML(n,i,ctx){
  <div class="note"><b>Objetivo.</b> ${esc(s.obj)}</div>
  <div class="card">${s.b.map(b=>`<div class="blk"><div class="m">${b[0]}<small>min</small></div><div><b>${esc(b[1])}</b>${b[2]?'<div class="mute">'+esc(b[2])+'</div>':''}</div></div>`).join('')}</div>
  <div class="card"><b>Material.</b> ${esc(s.mat)}<br><b>Evaluación.</b> ${esc(s.ev)}${s.pdf?`<div style="margin-top:8px"><a class="btn pri" style="display:inline-block;text-decoration:none" href="${BASEURL+s.pdf[1]}" target="_blank" rel="noopener">📄 ${esc(s.pdf[0])}</a></div>`:''}</div>`}
+function excGet(g){S.exc=S.exc||{};return S.exc[g]=S.exc[g]||{title:'',price:'',paid:{},only:false}}
+function vExc(g){
+ const E=excGet(g);const R=S.roster[g]||[];const pr=parseFloat(String(E.price).replace(',','.'))||0;
+ const np=R.filter((n,i)=>E.paid[i]).length;const tot=np*pr;
+ const f=x=>String(Math.round(x*100)/100).replace('.',',');
+ return `<div class="sheet"><div><div class="bar row"><button class="btn" data-a="close">‹ Volver</button><span class="sp"></span></div>
+ <h2>Excursión: dinero</h2>
+ <div class="chips">${['1ºC','1ºD'].map(x=>`<button class="chip ${x===g?'on':''}" data-a="excg" data-g="${x}">${x}</button>`).join('')}</div>
+ <div class="card"><label class="small mute">Excursión</label><input data-a="excf" data-f="title" data-g="${esc(g)}" value="${esc(E.title)}" placeholder="Nombre de la excursión" style="width:100%;font-size:16px;margin:2px 0 8px">
+ <label class="small mute">Precio por alumno (€)</label><input data-a="excf" data-f="price" data-g="${esc(g)}" value="${esc(E.price)}" inputmode="decimal" placeholder="0" style="width:100%;font-size:16px;margin:2px 0 8px">
+ <div style="font-size:18px"><b>${np} / ${R.length}</b> han pagado${pr?` · <b>${f(tot)} €</b> recogidos`:''}</div>
+ ${pr?`<div class="small mute">Faltan ${R.length-np} (${f((R.length-np)*pr)} €)</div>`:''}
+ <div class="row" style="margin-top:8px"><button class="btn sm ${E.only?'pri':''}" data-a="exconly" data-g="${esc(g)}">Solo pendientes</button><button class="btn sm" data-a="exccopy" data-g="${esc(g)}">Copiar pendientes</button><button class="btn sm" data-a="excclr" data-g="${esc(g)}">Borrar checks</button></div><div id="cpy" class="small mute" style="margin-top:6px"></div></div>
+ ${R.length?`<div class="card">`+R.map((n,i)=>({n,i})).filter(o=>!(E.only&&E.paid[o.i])).map(o=>`<div class="st exrow" data-a="excp" data-g="${esc(g)}" data-s="${o.i}" style="display:flex;align-items:center;gap:12px;padding:10px 4px;cursor:pointer"><span class="excb ${E.paid[o.i]?'on':''}">${E.paid[o.i]?'✓':''}</span><span style="font-size:17px;${E.paid[o.i]?'opacity:.6':''}">${esc(o.n)}</span></div>`).join('')+`</div>`:`<div class="card mute">No hay alumnado en ${esc(g)}.</div>`}
+ </div></div>`}
 function vSheet(){
  const u=UI.sheet;
+ if(u.type==='exc')return vExc(u.g);
  if(u.type==='rub'){const a=actsFor(u.g).find(x=>x.id===u.id);
   let body;
   if(!a.lv)body=`<div class="card">Esta actividad se puntúa de 0 a 10. Criterios: ${esc(a.desc)}</div><div class="card"><b>Criterios de evaluación</b>${cdesc(a.c)}</div>`;
@@ -254,6 +271,7 @@ function vSheet(){
  if(c&&c.sda)h+=sessionHTML(c.sda,c.s-1);
  else h+=`<h2>Clase de reserva / repaso</h2><div class="card mute">Las 12 sesiones de los dos SdA ya están cubiertas. Úsala para recuperar, repasar o terminar evaluaciones pendientes.</div>`;
 
+ if(u.g[0]==='1')h+=`<div class="card"><button class="btn pri" data-a="exc" data-g="${esc(u.g)}">💶 Excursión: recoger dinero</button></div>`;
  {const R=S.roster[u.g]||[];const at=(S.att||{})[key]||{};
  h+=`<div class="card"><h3>Comportamiento y actitud</h3>`;
  if(!R.length)h+=`<div class="small mute" style="margin:4px 0 8px">Aún no hay alumnado cargado. Pega aquí el texto de todas las listas (el archivo alumnado_cuaderno.txt) y pulsa Importar. Solo se hace una vez.</div><textarea id="imp" placeholder="## 1ºC&#10;Ana L.&#10;…"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>`;
@@ -344,7 +362,8 @@ function vAj(){
  <textarea id="imp" style="margin-top:8px" placeholder="Pega aquí todas las listas:&#10;## 1ºC&#10;Ana L.&#10;Luis P.&#10;## 1ºD …"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 3 nov 2026 · n</div></div>`}
+ <div class="card"><h3>Excursión</h3><div class="row"><button class="btn" data-a="exc" data-g="1ºC">💶 1ºC</button><button class="btn" data-a="exc" data-g="1ºD">💶 1ºD</button></div></div>
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 3 nov 2026 · o</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
@@ -426,7 +445,12 @@ document.addEventListener('click',async e=>{
  const el=e.target.closest('[data-a]');if(!el||el.tagName==='TEXTAREA'||el.tagName==='SELECT')return;
  const a=el.dataset.a,D=el.dataset;
  if(a==='clock'){openClock(D.k);return}
- if(a==='tab'){UI.tab=D.v;UI.sheet=null}
+ if(a==='exc'||a==='excg'){UI.sheet={type:'exc',g:D.g}}
+ else if(a==='excp'){const E=excGet(D.g);if(E.paid[D.s])delete E.paid[D.s];else E.paid[D.s]=1;save()}
+ else if(a==='exconly'){const E=excGet(D.g);E.only=!E.only;save()}
+ else if(a==='excclr'){const E=excGet(D.g);E.paid={};save()}
+ else if(a==='exccopy'){const E=excGet(D.g);const t=(S.roster[D.g]||[]).filter((n,i)=>!E.paid[i]).join('\n');let ok=false;try{await navigator.clipboard.writeText(t);ok=true}catch(err){}document.getElementById('cpy').innerHTML=ok?'Lista de pendientes copiada.':'Selecciona el texto:<textarea readonly>'+esc(t)+'</textarea>';return}
+ else if(a==='tab'){UI.tab=D.v;UI.sheet=null}
  else if(a==='day')UI.date=D.v;
  else if(a==='wk'){let d=addDays(UI.date,+D.v);UI.date=d}
  else if(a==='today')UI.date=null;
@@ -469,7 +493,7 @@ document.addEventListener('click',async e=>{
    try{const bl=new Blob([txt],{type:'text/calendar'});const url=URL.createObjectURL(bl);const a=document.createElement('a');a.href=url;a.download='clases-cantely.ics';document.body.appendChild(a);a.click();a.remove();msg.textContent='Listo. Ábrelo desde Archivos (o la notificación de descargas) para añadirlo a Calendario.';return}catch(err){}
    msg.innerHTML='Descarga no disponible. Copia este texto en un archivo .ics:<textarea readonly>'+esc(txt)+'</textarea>';return}
  render()});
-document.addEventListener('change',e=>{const el=e.target;if(el.dataset.a==='eva'){UI.evA=el.value;UI.evI=0;render()}});
+document.addEventListener('change',e=>{const el=e.target;if(el.dataset&&el.dataset.a==='excf'){excGet(el.dataset.g)[el.dataset.f]=el.value;save();render();return}if(el.dataset.a==='eva'){UI.evA=el.value;UI.evI=0;render()}});
 document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.a==='note'){S.notes[el.dataset.k]=el.value;save()}});
 render();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
