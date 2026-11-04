@@ -242,6 +242,9 @@ function sessionHTML(n,i,ctx){
  <div class="card">${s.b.map(b=>`<div class="blk"><div class="m">${b[0]}<small>min</small></div><div><b>${esc(b[1])}</b>${b[2]?'<div class="mute">'+esc(b[2])+'</div>':''}</div></div>`).join('')}</div>
  <div class="card"><b>Material.</b> ${esc(s.mat)}<br><b>Evaluación.</b> ${esc(s.ev)}${s.pdf?`<div style="margin-top:8px"><a class="btn pri" style="display:inline-block;text-decoration:none" href="${BASEURL+s.pdf[1]}" target="_blank" rel="noopener">📄 ${esc(s.pdf[0])}</a></div>`:''}</div>`}
 function excGet(g){S.exc=S.exc||{};return S.exc[g]=S.exc[g]||{title:'',price:'',paid:{},only:false}}
+function excCsv(only){const rows=[['Grupo','Alumno','Excursión','Pagado','Importe (€)']];
+ ['1ºC','1ºD'].forEach(g=>{const E=excGet(g);(S.roster[g]||[]).forEach((n,i)=>{const p=!!E.paid[i];if(only&&!p)return;rows.push([g,n,E.title||'',p?'Sí':'No',p?(E.price||''):''])})});
+ return '\ufeff'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(';')).join('\r\n')}
 function vExc(g){
  const E=excGet(g);const R=S.roster[g]||[];const pr=parseFloat(String(E.price).replace(',','.'))||0;
  const np=R.filter((n,i)=>E.paid[i]).length;const tot=np*pr;
@@ -253,7 +256,7 @@ function vExc(g){
  <label class="small mute">Precio por alumno (€)</label><input data-a="excf" data-f="price" data-g="${esc(g)}" value="${esc(E.price)}" inputmode="decimal" placeholder="0" style="width:100%;font-size:16px;margin:2px 0 8px">
  <div style="font-size:18px"><b>${np} / ${R.length}</b> han pagado${pr?` · <b>${f(tot)} €</b> recogidos`:''}</div>
  ${pr?`<div class="small mute">Faltan ${R.length-np} (${f((R.length-np)*pr)} €)</div>`:''}
- <div class="row" style="margin-top:8px"><button class="btn sm ${E.only?'pri':''}" data-a="exconly" data-g="${esc(g)}">Solo pendientes</button><button class="btn sm" data-a="exccopy" data-g="${esc(g)}">Copiar pendientes</button><button class="btn sm" data-a="excclr" data-g="${esc(g)}">Borrar checks</button></div><div id="cpy" class="small mute" style="margin-top:6px"></div></div>
+ <div class="row" style="margin-top:8px"><button class="btn sm ${E.only?'pri':''}" data-a="exconly" data-g="${esc(g)}">Solo pendientes</button><button class="btn sm" data-a="exccopy" data-g="${esc(g)}">Copiar pendientes</button><button class="btn sm" data-a="excclr" data-g="${esc(g)}">Borrar checks</button></div><div class="row" style="margin-top:8px"><button class="btn pri sm" data-a="excxls" data-m="1">Excel: los que han pagado (1ºC y 1ºD)</button><button class="btn sm" data-a="excxls" data-m="0">Excel: todos</button></div><div id="cpy" class="small mute" style="margin-top:6px"></div></div>
  ${R.length?`<div class="card">`+R.map((n,i)=>({n,i})).filter(o=>!(E.only&&E.paid[o.i])).map(o=>`<div class="st exrow" data-a="excp" data-g="${esc(g)}" data-s="${o.i}" style="display:flex;align-items:center;gap:12px;padding:10px 4px;cursor:pointer"><span class="excb ${E.paid[o.i]?'on':''}">${E.paid[o.i]?'✓':''}</span><span style="font-size:17px;${E.paid[o.i]?'opacity:.6':''}">${esc(o.n)}</span></div>`).join('')+`</div>`:`<div class="card mute">No hay alumnado en ${esc(g)}.</div>`}
  </div></div>`}
 function vSheet(){
@@ -364,7 +367,7 @@ function vAj(){
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
  <div class="card"><h3>Excursión</h3><div class="row"><button class="btn" data-a="exc" data-g="1ºC">💶 1ºC</button><button class="btn" data-a="exc" data-g="1ºD">💶 1ºD</button></div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 4 nov 2026 · p</div></div>`}
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 4 nov 2026 · q</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
@@ -449,6 +452,11 @@ document.addEventListener('click',async e=>{
  if(a==='exc'||a==='excg'){UI.sheet={type:'exc',g:D.g}}
  else if(a==='excp'){const E=excGet(D.g);if(E.paid[D.s])delete E.paid[D.s];else E.paid[D.s]=1;save()}
  else if(a==='exconly'){const E=excGet(D.g);E.only=!E.only;save()}
+ else if(a==='excxls'){const txt=excCsv(D.m==='1');const fn='excursion-pagados.csv';const msg=document.getElementById('cpy');
+   try{if(typeof claude!=='undefined'){const dl=await claude.use('downloads');if(dl){await dl.save({filename:D.m==='1'?fn:'excursion-todos.csv',data:txt});msg.textContent='Listo. Ábrelo con Excel.';return}}}catch(err){}
+   try{const f=new File([txt],D.m==='1'?fn:'excursion-todos.csv',{type:'text/csv'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return}}catch(err){}
+   try{await navigator.clipboard.writeText(txt);msg.textContent='Copiado. Pégalo en una hoja de Excel o Notas.';return}catch(err){}
+   msg.innerHTML='Selecciona el texto:<textarea readonly>'+esc(txt)+'</textarea>';return}
  else if(a==='excclr'){const E=excGet(D.g);E.paid={};save()}
  else if(a==='exccopy'){const E=excGet(D.g);const t=(S.roster[D.g]||[]).filter((n,i)=>!E.paid[i]).join('\n');let ok=false;try{await navigator.clipboard.writeText(t);ok=true}catch(err){}document.getElementById('cpy').innerHTML=ok?'Lista de pendientes copiada.':'Selecciona el texto:<textarea readonly>'+esc(t)+'</textarea>';return}
  else if(a==='tab'){UI.tab=D.v;UI.sheet=null}
