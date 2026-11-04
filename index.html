@@ -275,7 +275,7 @@ function vSheet(){
  {const R=S.roster[u.g]||[];const at=(S.att||{})[key]||{};
  h+=`<div class="card"><h3>Comportamiento y actitud</h3>`;
  if(!R.length)h+=`<div class="small mute" style="margin:4px 0 8px">Aún no hay alumnado cargado. Pega aquí el texto de todas las listas (el archivo alumnado_cuaderno.txt) y pulsa Importar. Solo se hace una vez.</div><textarea id="imp" placeholder="## 1ºC&#10;Ana L.&#10;…"></textarea><button class="btn pri" style="margin-top:8px" data-a="importroster">Importar listas</button><div id="impmsg" class="small mute" style="margin-top:6px"></div>`;
- else{h+=`<div class="legend">${ATTLV.map((l,i)=>`<i style="background:var(--l${i+1});color:var(--l${i+1}f)">${i+1} ${esc(l)}</i>`).join('')}</div><div class="row" style="margin:6px 0"><button class="btn sm" data-a="attall" data-k="${esc(key)}" data-n="${R.length}">Todos «Bien» (3)</button><button class="btn sm" data-a="attclr" data-k="${esc(key)}">Borrar</button></div>`+R.map((n,si)=>`<div class="st"><div class="nm"><span>${esc(n)}</span><span class="mute small">${at[si]?ATTLV[at[si]-1]:'–'}</span></div><div class="btns">${ATTLV.map((l,i)=>`<button class="v${i+1} ${at[si]===i+1?'on':''}" data-a="att" data-k="${esc(key)}" data-s="${si}" data-v="${i+1}">${i+1}</button>`).join('')}</div>${exRow(key,si)}</div>`).join('')}
+ else{h+=`<div class="legend">${ATTLV.map((l,i)=>`<i style="background:var(--l${i+1});color:var(--l${i+1}f)">${i+1} ${esc(l)}</i>`).join('')}</div><div class="row" style="margin:6px 0"><span class="small mute">Nivel:</span>${ATTLV.map((l,i)=>`<button class="cell ${(UI.attLv||3)===i+1?'on':''}" style="${(UI.attLv||3)===i+1?'background:var(--l'+(i+1)+');color:var(--l'+(i+1)+'f)':''}" data-a="attlv" data-v="${i+1}">${i+1}</button>`).join('')}<button class="btn sm pri" data-a="attall" data-k="${esc(key)}" data-n="${R.length}">Poner ${UI.attLv||3} a todos (${ATTLV[(UI.attLv||3)-1]})</button><button class="btn sm" data-a="attclr" data-k="${esc(key)}">Borrar</button></div>`+R.map((n,si)=>`<div class="st"><div class="nm"><span>${esc(n)}</span><span class="mute small">${at[si]?ATTLV[at[si]-1]:'–'}</span></div><div class="btns">${ATTLV.map((l,i)=>`<button class="v${i+1} ${at[si]===i+1?'on':''}" data-a="att" data-k="${esc(key)}" data-s="${si}" data-v="${i+1}">${i+1}</button>`).join('')}</div>${exRow(key,si)}</div>`).join('')}
  h+=`<div class="small mute" style="margin-top:6px">Se guarda por clase. La nota de «Comportamiento y actitud» sale de la media de las clases de la unidad.</div></div>`}
  h+=`<div class="card"><label class="small mute">Notas de la clase</label><textarea data-a="note" data-k="${esc(key)}" placeholder="Qué ha pasado, qué repetir…">${esc(S.notes[key]||'')}</textarea>
  <div class="row" style="margin-top:8px"><button class="btn ${S.done[key]?'pri':''}" data-a="done" data-k="${esc(key)}">${S.done[key]?'✓ Hecha':'Marcar como hecha'}</button>
@@ -340,7 +340,8 @@ function vEval(){
     const show=v==null?'–':(a.lv?a.lv[v-1]:(v+(sc.h?0.5:0)));
     return `<div class="st"><div class="nm"><span>${esc(n)}</span><span class="mute small">${esc(show)}</span></div>${btns}</div>`}).join('')+`</div>`;
  }else{
-  const FL=UI.fillLv||3;
+  const FL=UI.fillLv||3;const NL=UI.numLv==null?5:UI.numLv;
+  if(!a.lv)h+=`<div class="card"><div class="small mute" style="margin-bottom:6px">Nota para poner a todos:</div><div class="btns n10">${[0,1,2,3,4,5,6,7,8,9,10].map(i=>`<button class="vn ${NL===i?'on':''}" data-a="numlv" data-v="${i}">${i}</button>`).join('')}</div><div class="row" style="margin-top:8px"><button class="btn pri sm" data-a="numall" data-m="empty">Poner ${NL} a los vacíos</button><button class="btn sm" data-a="numall" data-m="all">Poner ${NL} a toda la clase</button></div><div class="small mute" style="margin-top:4px">Después cambia la de cada alumno en su pestaña.</div></div>`;
   if(a.lv)h+=`<div class="card"><div class="small mute" style="margin-bottom:6px">Nivel para rellenar rápido:</div><div class="btns">${a.lv.map((l,i)=>`<button class="v${i+1} ${FL===i+1?'on':''}" data-a="fl" data-v="${i+1}">${i+1}</button>`).join('')}</div><div class="small mute" style="margin:4px 0">${esc(a.lv[FL-1])}</div><div class="row"><button class="btn pri sm" data-a="fillall">Poner ${FL} a todos (los vacíos)</button></div><div class="small mute" style="margin-top:4px">Después toca una casilla para cambiarla (1→2→…→vacío). Toca el nombre de una columna para poner ${FL} a toda la columna.</div></div>`;
   h+=`<div class="card scroll"><table><tr><th>Alumno/a</th>${a.lv?a.inds.map((x,i)=>`<th><button class="btn sm" data-a="fillcol" data-i="${i}">${esc(x.slice(0,4))}</button></th>`).join(''):''}<th>Nota</th>${a.id.startsWith('act')?'<th>⭐</th><th>😞</th>':''}</tr>`+R.map((n,si)=>{
     const nt=grade(g,a,si);const xt=a.id.startsWith('act')?exTot(g,a.sda,si):null;const sc=S.scores[g+'|'+a.id+'|'+si]||{};return `<tr><td>${esc(n)}</td>${a.lv?a.inds.map((x,i)=>{const v=sc[i];return `<td>${v?`<button class="cell" style="background:var(--l${v});color:var(--l${v}f)" data-a="cyc" data-s="${si}" data-i="${i}">${v}</button>`:`<button class="cell" data-a="cyc" data-s="${si}" data-i="${i}">–</button>`}</td>`}).join(''):''}<td class="nota">${nt==null?'–':nt}</td>${xt?`<td>${xt.p||'–'}</td><td>${xt.n||'–'}</td>`:''}</tr>`}).join('')+`</table></div>
@@ -363,7 +364,7 @@ function vAj(){
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
  <div class="card"><h3>Excursión</h3><div class="row"><button class="btn" data-a="exc" data-g="1ºC">💶 1ºC</button><button class="btn" data-a="exc" data-g="1ºD">💶 1ºD</button></div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 3 nov 2026 · o</div></div>`}
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 4 nov 2026 · p</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
@@ -461,8 +462,11 @@ document.addEventListener('click',async e=>{
  else if(a==='skip'){(S.skipped[D.g]=S.skipped[D.g]||[]).push(D.k);Object.keys(_cache).forEach(k=>delete _cache[k]);UI.sheet=null;save()}
  else if(a==='unskip'){S.skipped[D.g]=(S.skipped[D.g]||[]).filter(x=>x!==D.k);Object.keys(_cache).forEach(k=>delete _cache[k]);save()}
  else if(a==='att'){S.att=S.att||{};const k=S.att[D.k]=S.att[D.k]||{};if(k[D.s]===+D.v)delete k[D.s];else k[D.s]=+D.v;save()}
- else if(a==='attall'){S.att=S.att||{};const k={};for(let i=0;i<+D.n;i++)k[i]=3;S.att[D.k]=k;save()}
+ else if(a==='attall'){S.att=S.att||{};const k={};for(let i=0;i<+D.n;i++)k[i]=UI.attLv||3;S.att[D.k]=k;save()}
  else if(a==='exadd'||a==='exsub'){S.ex=S.ex||{};const k=S.ex[D.k]=S.ex[D.k]||{};const e=k[D.s]=k[D.s]||{p:0,n:0};e[D.t]=Math.max(0,(e[D.t]||0)+(a==='exadd'?1:-1));save()}
+ else if(a==='attlv'){UI.attLv=+D.v}
+ else if(a==='numlv'){UI.numLv=+D.v}
+ else if(a==='numall'){const ac=actsFor(UI.evG).find(x=>x.id===UI.evA);const L=UI.numLv==null?5:UI.numLv;(S.roster[UI.evG]||[]).forEach((n,si)=>{const key=UI.evG+'|'+ac.id+'|'+si;const sc=S.scores[key]=S.scores[key]||{};if(D.m==='all'||sc[0]==null)sc[0]=L});save()}
  else if(a==='attclr'){S.att=S.att||{};delete S.att[D.k];save()}
  else if(a==='rub')UI.sheet={type:'rub',id:D.id,g:D.g};
  else if(a==='copyrub'){const ac=actsFor(D.g).find(x=>x.id===D.id);const Dd=RUBD[ac.lv.length];
