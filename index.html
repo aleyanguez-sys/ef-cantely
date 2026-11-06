@@ -258,7 +258,7 @@ function vExc(g){
  <div class="row" style="margin-top:8px"><button class="btn sm ${E.only?'pri':''}" data-a="exconly" data-g="${esc(g)}">Solo pendientes</button><button class="btn sm" data-a="exccopy" data-g="${esc(g)}">Copiar pendientes</button><button class="btn sm" data-a="excclr" data-g="${esc(g)}">Borrar checks</button></div><div class="row" style="margin-top:8px"><button class="btn sm" data-a="cash">💶 Contar dinero</button><button class="btn pri sm" data-a="excxls" data-m="1">Excel: los que han pagado (1ºC y 1ºD)</button><button class="btn sm" data-a="excxls" data-m="0">Excel: todos</button></div><div id="cpy" class="small mute" style="margin-top:6px"></div></div>
  ${R.length?`<div class="card">`+R.map((n,i)=>({n,i})).filter(o=>!(E.only&&E.paid[o.i])).map(o=>`<div class="st exrow" data-a="excp" data-g="${esc(g)}" data-s="${o.i}" style="display:flex;align-items:center;gap:12px;padding:10px 4px;cursor:pointer"><span class="excb ${E.paid[o.i]?'on':''}">${E.paid[o.i]?'✓':''}</span><span style="font-size:17px;${E.paid[o.i]?'opacity:.6':''}">${esc(o.n)}</span></div>`).join('')+`</div>`:`<div class="card mute">No hay alumnado en ${esc(g)}.</div>`}
  </div></div>`}
-const CASH=[['Billetes',[[20,'20 €'],[10,'10 €'],[5,'5 €']]],['Monedas',[[2,'2 €'],[1,'1 €'],[0.5,'0,50 €'],[0.2,'0,20 €'],[0.1,'0,10 €']]]];
+const CASH=[['Billetes',[[20,'20 €'],[10,'10 €'],[5,'5 €']]],['Monedas',[[2,'2 €'],[1,'1 €'],[0.5,'0,50 €'],[0.2,'0,20 €'],[0.1,'0,10 €'],[0.05,'0,05 €'],[0.02,'0,02 €'],[0.01,'0,01 €']]]];
 function fm(x){return (Math.round(x*100)/100).toFixed(2).replace('.',',')+' €'}
 function cashTot(){S.cash=S.cash||{};let t=0;CASH.forEach(g=>g[1].forEach(d=>{t+=(S.cash[d[0]]||0)*d[0]}));return Math.round(t*100)/100}
 function cashExp(){let t=0,n=0;['1ºC','1ºD'].forEach(g=>{const E=excGet(g);const pr=parseFloat(String(E.price).replace(',','.'))||0;const np=(S.roster[g]||[]).filter((x,i)=>E.paid[i]).length;t+=np*pr;n+=np});return {t:Math.round(t*100)/100,n}}
@@ -379,7 +379,7 @@ function vAj(){
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
  <div class="card"><h3>Excursión</h3><div class="row" style="margin-bottom:8px"><button class="btn pri" data-a="cash">🧮 Contar dinero</button></div><div class="row"><button class="btn" data-a="exc" data-g="1ºC">💶 1ºC</button><button class="btn" data-a="exc" data-g="1ºD">💶 1ºD</button></div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 6 nov 2026 · t</div></div>`}
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 6 nov 2026 · u</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
