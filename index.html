@@ -106,13 +106,12 @@ const SDA={
      [22,'Circuito AMRAP de 10\' + 10\' (cambio de papeles)','Una mochila por pareja. 10 min seguidos: sentadilla ×10 · press ×8 · peso muerto ×10 · zancadas ×8 por pierna · remo ×10 y vuelta a empezar. Uno ejecuta y el otro evalúa la técnica en la ficha y cuenta las rondas; 2 min de cambio.'],
      [8,'Vuelta a la calma y puesta en común','Estiramiento + RPE. Cada pareja comenta una cosa bien y una a mejorar.']],
   mat:'Una mochila por pareja, colchonetas, cronómetro, fichas de evaluación recíproca impresas (una por pareja).',pdf:['Ficha de evaluación recíproca (imprimir)','ficha_evaluacion_reciproca.pdf'],ev:'Coevaluación en pareja (ficha de evaluación recíproca) + Observación: Comportamiento y actitud (sesión 3).'},
- {t:'Hyrox I: conocemos el formato y diseñamos',obj:'Entender el formato Hyrox, probar estaciones adaptadas al material del centro y empezar a diseñar el circuito en la ficha.',
-  b:[[8,'Calentamiento','Carrera continua 3\' + movilidad + progresiones.'],
-     [10,'Explicación del Hyrox','8 rondas: carrera + estación. Aquí lo adaptamos con el material del cole.'],
-     [22,'Rotación de estaciones adaptadas','Empuje de colchoneta · arrastre de cuerda con colchoneta · burpee broad jump · remo con goma · transporte de mochilas · zancadas con mochila. 2\' trabajo + 1\' cambio.'],
-     [10,'Diseño en la ficha','Cada equipo elige sus 6 estaciones, tiempos, normas de seguridad y escalado.'],
-     [5,'Vuelta a la calma + RPE','']],
-  mat:'Colchonetas, cuerdas, gomas, mochilas, balones medicinales, fichas.',pdf:['Ficha del circuito Hyrox (imprimir, una por equipo de 4)','ficha_circuito_hyrox.pdf'],ev:'EVALÚA: Ficha Hyrox (progreso) + Actitud.'},
+ {t:'Hyrox I: reto pillar de fuerza y diseño del Hyrox',obj:'Activar el cuerpo, trabajar la fuerza de forma lúdica en el reto pillar y diseñar en equipo el circuito Hyrox con la ficha.',
+  b:[[8,'Calentamiento','Carrera suave 3\' + movilidad de cadera y hombros + activación de glúteo y core.'],
+     [17,'Reto pillar - fuerza','Pilla-pilla con retos de fuerza: 4-5 pilladores con peto. Quien es pillado hace un reto (10 sentadillas · 8 flexiones · plancha 20\" · 10 puentes de glúteo) y vuelve al juego. Se cambia de pilladores cada 3\'.'],
+     [25,'Diseño de Hyrox','Equipos de 4. Explicar el formato (3\'), repartir la ficha y diseñar 6 estaciones con el material del cole: tipo de ejercicio, reps o tiempo, material, más fácil / más difícil, orden y seguridad. Probar una estación si sobra tiempo.'],
+     [5,'Vuelta a la calma y entrega','Estiramientos suaves. Se guarda la ficha: se cierra y se entrega en la sesión siguiente.']],
+  mat:'Petos, fichas impresas (una por equipo), bolígrafos, material del cole para probar (colchonetas, mochilas, gomas, cuerdas).',pdf:['Ficha para diseñar el Hyrox (imprimir, una por equipo de 4)','ficha_diseno_hyrox.pdf'],ev:'EVALÚA: Ficha Hyrox (progreso) + Actitud.'},
  {t:'Hyrox II: cerramos la ficha e intercambiamos circuitos',obj:'Cerrar la ficha, montar el circuito y probar el de otro equipo con feedback.',
   b:[[8,'Calentamiento',''],
      [15,'Cerrar y entregar la ficha','Revisar con lista de cotejo: seguridad, claridad, organización.'],
@@ -367,7 +366,7 @@ function vAj(){
  ${UI.editG?`<textarea id="rost" style="margin-top:8px">${esc((S.roster[UI.editG]||[]).join('\n'))}</textarea><button class="btn pri" style="margin-top:8px" data-a="saveroster" data-g="${esc(UI.editG)}">Guardar ${esc(UI.editG)}</button>`:''}</div>
  <div class="card"><h3>Calendario del curso</h3><div class="small mute">Sin clase: 2 nov (festivo), 7 y 8 dic. Fin: 22 dic. Cada grupo tiene ${GROUPS.map(g=>gk(g)+': '+classes(g).length).join(' · ')} clases.</div></div>
  <div class="card"><h3>Excursión</h3><div class="row"><button class="btn" data-a="exc" data-g="1ºC">💶 1ºC</button><button class="btn" data-a="exc" data-g="1ºD">💶 1ºD</button></div></div>
- <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 4 nov 2026 · q</div></div>`}
+ <div class="card"><h3>Datos</h3><div class="small mute">Se guardan solo en este dispositivo (no se sincronizan). Versión: 6 nov 2026 · r</div></div>`}
 
 /* ===================== ICS ===================== */
 function icsText(){
@@ -387,7 +386,7 @@ function icsText(){
 function rep(n,arr){let o=[];for(let k=0;k<n;k++)arr.forEach(x=>o.push(x));return o}
 const CLKP={
 '1-2':[{n:'AMRAP 10\' + 10\' (cambio de papeles)',ph:[['Turno 1: ejecuta',600,'w'],['Cambio de papeles',20,'r'],['Turno 2: ejecuta',600,'w']]}],
-'1-3':[{n:'Rotación de estaciones: 6 × (2\' + 1\' cambio)',ph:rep(6,[['Estación',120,'w'],['Cambio',60,'r']])}],
+'1-3':[{n:'Reto pillar: 5 × (3\' juego + 30" cambio)',ph:rep(5,[['Reto pillar',180,'w'],['Cambio de pilladores',30,'r']])},{n:'Diseño del Hyrox: 20 min',ph:[['Diseño en equipo',1200,'w']]}],
 '1-4':[{n:'Intercambio de circuitos: 6 × (3\' + 1\' cambio)',ph:rep(6,[['Circuito',180,'w'],['Cambio de equipo',60,'r']])}],
 '1-5':[{n:'Mini Hyrox: 6 × (2\' + 1\' cambio)',ph:rep(6,[['Estación',120,'w'],['Cambio',60,'r']])},{n:'Examen: 20 min',ph:[['Examen',1200,'w']]}]};
 const CLKG=[
